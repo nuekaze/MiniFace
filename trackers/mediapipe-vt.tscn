@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1nxr241y17n3"]
+
+[ext_resource type="Script" path="res://trackers/mediapipe-vt.gd" id="1_pdc5p"]
+
+[node name="Mediapipe-yt" type="Node"]
+script = ExtResource("1_pdc5p")

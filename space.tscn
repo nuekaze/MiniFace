@@ -1,0 +1,174 @@
+[gd_scene load_steps=3 format=3 uid="uid://c2ms0vu61eflh"]
+
+[ext_resource type="Script" path="res://space.gd" id="1_o4tpj"]
+[ext_resource type="Script" path="res://UI.gd" id="1_v7e47"]
+
+[node name="Scene" type="Node3D"]
+script = ExtResource("1_o4tpj")
+
+[node name="UI" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -132.0
+offset_bottom = 339.0
+grow_horizontal = 0
+script = ExtResource("1_v7e47")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI"]
+layout_mode = 2
+
+[node name="Model" type="VBoxContainer" parent="UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/VBoxContainer/Model"]
+layout_mode = 2
+text = "Model"
+
+[node name="FileDialog" type="FileDialog" parent="UI/VBoxContainer/Model"]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(635, 500)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.vrm", "*.fbx", "*.gltf", "*.glb", "*.blend")
+
+[node name="Button" type="Button" parent="UI/VBoxContainer/Model"]
+layout_mode = 2
+text = "Load model"
+
+[node name="Settings" type="VBoxContainer" parent="UI/VBoxContainer/Model"]
+visible = false
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+text = "Facemesh"
+
+[node name="ItemList" type="ItemList" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+auto_height = true
+item_count = 1
+item_0/text = ""
+
+[node name="Label" type="Label" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+text = "Arm angle"
+
+[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+max_value = 90.0
+value = 70.0
+
+[node name="Label3" type="Label" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+text = "Head to body move ratio"
+
+[node name="HSlider2" type="HSlider" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 0.3
+
+[node name="Camera" type="VBoxContainer" parent="UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+text = "Camera Position"
+
+[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+min_value = -180.0
+max_value = 180.0
+
+[node name="Label2" type="Label" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+text = "Camera Distance
+"
+
+[node name="HSlider2" type="HSlider" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+max_value = 10.0
+step = 0.01
+value = 1.0
+
+[node name="Label3" type="Label" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+text = "Camera Height
+"
+
+[node name="HSlider3" type="HSlider" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+min_value = 1.0
+max_value = 2.0
+step = 0.01
+value = 1.7
+
+[node name="Tracker" type="VBoxContainer" parent="UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/VBoxContainer/Tracker"]
+layout_mode = 2
+text = "Tracker"
+
+[node name="ItemList" type="ItemList" parent="UI/VBoxContainer/Tracker"]
+layout_mode = 2
+allow_search = false
+auto_height = true
+item_count = 4
+item_0/text = "Mediapipe-VT"
+item_1/text = "OpenSeeFace"
+item_1/selectable = false
+item_1/disabled = true
+item_2/text = "VTube Studio"
+item_3/text = "iFacialMocap"
+item_3/selectable = false
+item_3/disabled = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/VBoxContainer/Tracker"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/VBoxContainer/Tracker/VBoxContainer"]
+layout_mode = 2
+text = "iPhone IP"
+
+[node name="TextEdit" type="TextEdit" parent="UI/VBoxContainer/Tracker/VBoxContainer"]
+custom_minimum_size = Vector2(0, 34.535)
+layout_mode = 2
+placeholder_text = "127.0.0.1"
+
+[node name="Label2" type="Label" parent="UI/VBoxContainer/Tracker"]
+layout_mode = 2
+text = "Smoothing"
+
+[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Tracker"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 0.3
+
+[node name="Button" type="Button" parent="UI/VBoxContainer/Tracker"]
+layout_mode = 2
+toggle_mode = true
+text = "Start"
+
+[node name="Button2" type="Button" parent="UI/VBoxContainer/Tracker"]
+layout_mode = 2
+text = "Reset position"
+
+[node name="Camera3D" type="Camera3D" parent="."]
+current = true
+
+[connection signal="file_selected" from="UI/VBoxContainer/Model/FileDialog" to="." method="_on_model_selected"]
+[connection signal="pressed" from="UI/VBoxContainer/Model/Button" to="." method="_on_load_button_pressed"]
+[connection signal="item_selected" from="UI/VBoxContainer/Model/Settings/ItemList" to="." method="_on_facemesh_selected"]
+[connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider" to="." method="_on_arm_angle_change"]
+[connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider" to="." method="_on_camera_change"]
+[connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider2" to="." method="_on_camera_change"]
+[connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider3" to="." method="_on_camera_change"]
+[connection signal="item_selected" from="UI/VBoxContainer/Tracker/ItemList" to="." method="_on_tracker_selected"]
+[connection signal="toggled" from="UI/VBoxContainer/Tracker/Button" to="." method="_on_tracking_toggle"]
+[connection signal="pressed" from="UI/VBoxContainer/Tracker/Button2" to="." method="_on_position_reset"]
