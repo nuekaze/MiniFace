@@ -102,6 +102,47 @@ var rest_pose = {
 	}
 }
 
+
+# Light calculation
+func kelvin_to_rgb(temp):
+	# Function stolen from https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
+	var red = 0.0
+	var green = 0.0
+	var blue = 0.0
+	
+	# Process red
+	if temp <= 66:
+		red = 255
+	else:
+		red = 329.698727446 * (red ** -0.1332047592)
+	if red < 0: red = 0
+	elif red > 255: red = 255
+		
+	# Process green
+	if temp <= 66:
+		green = temp
+		green = 99.4708025861 * log(green) - 161.1195681661
+		
+	else:
+		green = temp - 60
+		green = 288.1221695283 * (green ** -0.0755148492)
+	if green < 0: green = 0
+	if green > 255: green = 255
+	
+	# Process blue
+	if temp >= 66:
+		blue = 255
+	else:
+		if temp <= 19:
+			blue = 0
+		else:
+			blue = temp - 10
+			blue = 138.5177312231 * log(blue) - 305.0447927307
+			if blue < 0: blue = 0
+			if blue > 255: blue = 255
+	
+	return Color(red/255, green/255, blue/255, 1.0)
+
 # Loader functions
 
 func load_model(path: String) -> Node3D:
@@ -220,10 +261,16 @@ func _on_model_selected(path):
 	
 	add_child(character)
 	for n in character.get_children():
+		if n is Skeleton3D:
+			skel = n
+			$UI/VBoxContainer/Model/Settings.visible = true
+			break
+			
 		for nn in n.get_children():
 			if nn is Skeleton3D:
 				skel = nn
 				$UI/VBoxContainer/Model/Settings.visible = true
+				
 	if not skel:
 		print("Could not find skel")
 		character.queue_free()
@@ -233,9 +280,9 @@ func _on_model_selected(path):
 	# Get arm bones for angle
 	for i in skel.get_bone_count():
 		if 'arm' in skel.get_bone_name(i).to_lower():
-			if 'L' in skel.get_bone_name(i) and 'lower' not in skel.get_bone_name(i).to_lower() and 'twist' not in skel.get_bone_name(i).to_lower():
+			if 'L' in skel.get_bone_name(i) and 'lower' not in skel.get_bone_name(i).to_lower() and 'twist' not in skel.get_bone_name(i).to_lower() and not left_arm:
 				left_arm = i
-			if 'R' in skel.get_bone_name(i) and 'lower' not in skel.get_bone_name(i).to_lower() and 'twist' not in skel.get_bone_name(i).to_lower():
+			if 'R' in skel.get_bone_name(i) and 'lower' not in skel.get_bone_name(i).to_lower() and 'twist' not in skel.get_bone_name(i).to_lower() and not right_arm:
 				right_arm = i
 		if 'head' in skel.get_bone_name(i).to_lower():
 			head = i
@@ -331,3 +378,32 @@ func _on_position_reset():
 
 func _on_load_button_pressed():
 	$UI/VBoxContainer/Model/FileDialog.visible = true
+
+
+# Light functions
+
+func _on_light_enable(toggled_on):
+	if toggled_on:
+		$UI/VBoxContainer/Camera/Light.visible = true
+		$DirectionalLight3D.visible = true
+		$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
+		
+	else:
+		$UI/VBoxContainer/Camera/Light.visible = false
+		$DirectionalLight3D.visible = false
+
+func _on_light_color_changed(value):
+	$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
+	
+
+
+func _on_light_rotation_changed(value):
+	$DirectionalLight3D.rotation.y = deg_to_rad(value)
+
+
+func _on_light_up_down_changed(value):
+	$DirectionalLight3D.rotation.x = deg_to_rad(value)
+
+
+func _on_light_strength_change(value):
+	$DirectionalLight3D.light_energy = value
