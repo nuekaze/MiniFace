@@ -26,3 +26,12 @@ This tracker supports the following formats.
 - gltf
 - fbx
 - blend
+
+## How to run the latest
+Easiest way to run the latest.
+1. Download [Godot engine](https://godotengine.org/). (I try develop in the latest version always)
+2. Download repo/files from this page using code button at the top. Extract if you download zip.
+3. Open Godot and import project folder.
+4. In menu you can now click "Run" to start it.
+
+Right now I have no scroll for the menu so you just have to make the window taller to see all options if they are hidden.
