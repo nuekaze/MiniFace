@@ -257,7 +257,12 @@ func _physics_process(delta):
 						tracking_data["Blendshapes"][b] * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
 					)
 
+func _on_viewport_resize():
+	$UI.size.y = get_viewport().size.y
+
 func _ready():
+	$UI.size.y = get_viewport().size.y
+	get_viewport().connect("size_changed", _on_viewport_resize)
 	# Check if there is saved config and load.
 	var f = FileAccess.open("user://config.json", FileAccess.READ)
 	if f:

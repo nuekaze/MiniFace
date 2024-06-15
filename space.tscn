@@ -1,7 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://c2ms0vu61eflh"]
+[gd_scene load_steps=5 format=3 uid="uid://c2ms0vu61eflh"]
 
 [ext_resource type="Script" path="res://space.gd" id="1_o4tpj"]
 [ext_resource type="Script" path="res://UI.gd" id="1_v7e47"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rjrao"]
+bg_color = Color(0, 0, 0, 0.501961)
 
 [sub_resource type="Environment" id="Environment_ey3ga"]
 background_mode = 1
@@ -13,13 +16,14 @@ reflected_light_source = 1
 [node name="Scene" type="Node3D"]
 script = ExtResource("1_o4tpj")
 
-[node name="UI" type="PanelContainer" parent="."]
+[node name="UI" type="ScrollContainer" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -132.0
-offset_bottom = 339.0
+offset_left = -200.0
+offset_bottom = 1080.0
 grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_rjrao")
 script = ExtResource("1_v7e47")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UI"]
