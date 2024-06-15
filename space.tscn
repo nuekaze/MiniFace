@@ -230,6 +230,7 @@ sky_mode = 1
 [connection signal="pressed" from="UI/VBoxContainer/Model/Button" to="." method="_on_load_button_pressed"]
 [connection signal="item_selected" from="UI/VBoxContainer/Model/Settings/ItemList" to="." method="_on_facemesh_selected"]
 [connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider" to="." method="_on_arm_angle_change"]
+[connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider2" to="." method="_on_hm_ratio_changed"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider" to="." method="_on_camera_change"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider2" to="." method="_on_camera_change"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider3" to="." method="_on_camera_change"]

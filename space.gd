@@ -11,6 +11,31 @@ var initial_hip_pos = Vector3(0.0, 0.0, 0.0)
 var head = null
 var tracker = null
 
+var config = {
+		"model": {
+			"path": "",
+			"facemesh": 1,
+			"arm_angle": 0,
+			"hm_ratio": 0.0
+		},
+		"camera": {
+			"position": 0,
+			"distance": 1.0,
+			"height": 1.7,
+			"light": {
+				"enabled": 0,
+				"temperature": 0,
+				"strength": 0.0,
+				"rotation": 0.0,
+				"height": 0.0
+			},
+			"tracker": {
+				"method": -1,
+				"iphone_ip": "127.0.0.1"
+			}
+		}
+	}
+
 # Tracking data is always in "VTube Studio like" format.
 var tracking_data = {
 	"Position": {
@@ -102,7 +127,6 @@ var rest_pose = {
 	}
 }
 
-
 # Light calculation
 func kelvin_to_rgb(temp):
 	# Function stolen from https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
@@ -157,6 +181,8 @@ func load_model(path: String) -> Node3D:
 	
 	is_vrm = 0
 	
+	config["model"]["path"] = path
+	
 	return generated_scene
 
 func load_vrm_model(path: String) -> Node3D:
@@ -179,12 +205,12 @@ func load_vrm_model(path: String) -> Node3D:
 	gltf.unregister_gltf_document_extension(vrm_extension)
 	
 	is_vrm = 1
+	config["model"]["path"] = path
 	
 	return generated_scene
 
 
 # Process stuff
-
 func _physics_process(delta):
 		if skel:
 			# Process bone rotations
@@ -232,9 +258,38 @@ func _physics_process(delta):
 					)
 
 func _ready():
-	# Init camera position once
-	_on_camera_change(0.0)
+	# Check if there is saved config and load.
+	var f = FileAccess.open("user://config.json", FileAccess.READ)
+	if f:
+		config = JSON.parse_string(f.get_as_text())
+		
+		# Load character if any.
+		if config["model"]["path"] != "":
+			_on_model_selected(config["model"]["path"])
+		
+		if character:
+			$UI/VBoxContainer/Model/Settings/ItemList.select(config["model"]["facemesh"])
+			_on_facemesh_selected(config["model"]["facemesh"])
+			$UI/VBoxContainer/Model/Settings/HSlider.set_value_no_signal(config["model"]["arm_angle"])
+			_on_arm_angle_change(config["model"]["arm_angle"])
+			$UI/VBoxContainer/Model/Settings/HSlider2.set_value_no_signal(config["model"]["hm_ratio"])
+		
+		# Load camera.
+		$UI/VBoxContainer/Camera/HSlider.set_value_no_signal(config["camera"]["position"])
+		$UI/VBoxContainer/Camera/HSlider2.set_value_no_signal(config["camera"]["distance"])
+		$UI/VBoxContainer/Camera/HSlider3.set_value_no_signal(config["camera"]["height"])
+		_on_camera_change(0)
+		
+		# Load light
+		$UI/VBoxContainer/Camera/HBoxContainer/CheckButton.button_pressed = config["camera"]["light"]["enabled"]
+		$UI/VBoxContainer/Camera/Light/HSlider.set_value_no_signal(config["camera"]["light"]["temperature"])
+		$UI/VBoxContainer/Camera/Light/HSlider4.set_value_no_signal(config["camera"]["light"]["strength"])
+		$UI/VBoxContainer/Camera/Light/HSlider2.set_value_no_signal(config["camera"]["light"]["rotation"])
+		$UI/VBoxContainer/Camera/Light/HSlider3.set_value_no_signal(config["camera"]["light"]["height"])
 
+func _exit_tree():
+	var f = FileAccess.open("user://config.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(config, '  '))
 
 # Signal functions
 
@@ -293,13 +348,14 @@ func _on_model_selected(path):
 	for m in skel.get_children():
 		if m is MeshInstance3D:
 			$UI/VBoxContainer/Model/Settings/ItemList.add_item(m.name)
-			
-	_on_arm_angle_change(0.0)
+	
+	config["model"]["path"] = path
 
 func _on_facemesh_selected(index):
 	if $UI/VBoxContainer/Model/Settings/ItemList.get_selected_items():
 		face = skel.get_node($UI/VBoxContainer/Model/Settings/ItemList.get_item_text(
 			$UI/VBoxContainer/Model/Settings/ItemList.get_selected_items()[0]))
+		config["model"]["face"] = index
 	else:
 		print("Could not find facemesh")
 
@@ -310,10 +366,15 @@ func _on_camera_change(value):
 		cos(deg_to_rad(float($UI/VBoxContainer/Camera/HSlider.value))) * float($UI/VBoxContainer/Camera/HSlider2.value)
 		)
 	$Camera3D.rotation.y = deg_to_rad(float($UI/VBoxContainer/Camera/HSlider.value))
+	
+	config["camera"]["position"] = $UI/VBoxContainer/Camera/HSlider.value
+	config["camera"]["distance"] = $UI/VBoxContainer/Camera/HSlider2.value
+	config["camera"]["height"] = $UI/VBoxContainer/Camera/HSlider3.value
 
 func _on_arm_angle_change(value):
-	skel.set_bone_pose_rotation(left_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float($UI/VBoxContainer/Model/Settings/HSlider.value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
-	skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float($UI/VBoxContainer/Model/Settings/HSlider.value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
+	skel.set_bone_pose_rotation(left_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
+	skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
+	config["model"]["arm_angle"] = $UI/VBoxContainer/Model/Settings/HSlider.value
 
 func _on_tracking_data_recived(new_data):
 	tracking_data = new_data
@@ -387,23 +448,28 @@ func _on_light_enable(toggled_on):
 		$UI/VBoxContainer/Camera/Light.visible = true
 		$DirectionalLight3D.visible = true
 		$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
+		config["camera"]["light"]["enabled"] = 1
 		
 	else:
 		$UI/VBoxContainer/Camera/Light.visible = false
 		$DirectionalLight3D.visible = false
+		config["camera"]["light"]["enabled"] = 0
 
 func _on_light_color_changed(value):
 	$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
-	
-
+	config["camera"]["light"]["temperature"] = $UI/VBoxContainer/Camera/Light/HSlider.value
 
 func _on_light_rotation_changed(value):
 	$DirectionalLight3D.rotation.y = deg_to_rad(value)
-
+	config["camera"]["light"]["rotation"] = value
 
 func _on_light_up_down_changed(value):
 	$DirectionalLight3D.rotation.x = deg_to_rad(value)
-
+	config["camera"]["light"]["height"] =  value
 
 func _on_light_strength_change(value):
 	$DirectionalLight3D.light_energy = value
+	config["camera"]["light"]["strength"] = value
+
+func _on_hm_ratio_changed(value):
+	config["model"]["hm_ratio"] = value
