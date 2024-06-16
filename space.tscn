@@ -244,5 +244,7 @@ sky_mode = 1
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider2" to="." method="_on_light_rotation_changed"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider3" to="." method="_on_light_up_down_changed"]
 [connection signal="item_selected" from="UI/VBoxContainer/Tracker/ItemList" to="." method="_on_tracker_selected"]
+[connection signal="text_changed" from="UI/VBoxContainer/Tracker/VBoxContainer/TextEdit" to="." method="_on_iphone_ip_changed"]
+[connection signal="value_changed" from="UI/VBoxContainer/Tracker/HSlider" to="." method="_on_smoothing_changed"]
 [connection signal="toggled" from="UI/VBoxContainer/Tracker/Button" to="." method="_on_tracking_toggle"]
 [connection signal="pressed" from="UI/VBoxContainer/Tracker/Button2" to="." method="_on_position_reset"]

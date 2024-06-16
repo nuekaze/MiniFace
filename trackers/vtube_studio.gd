@@ -121,7 +121,6 @@ func _ready():
 	
 	
 func start_poller(ip):
-	print(ip)
 	client.connect_to_host(ip, 21412)
 	$PollTimer.start(1.0)
 

@@ -29,10 +29,11 @@ var config = {
 				"rotation": 0.0,
 				"height": 0.0
 			},
-			"tracker": {
-				"method": -1,
-				"iphone_ip": "127.0.0.1"
-			}
+		},
+		"tracker": {
+			"method": -1,
+			"iphone_ip": "",
+			"smoothing": 0.3
 		}
 	}
 
@@ -126,46 +127,6 @@ var rest_pose = {
 		"z": 0.0
 	}
 }
-
-# Light calculation
-func kelvin_to_rgb(temp):
-	# Function stolen from https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
-	var red = 0.0
-	var green = 0.0
-	var blue = 0.0
-	
-	# Process red
-	if temp <= 66:
-		red = 255
-	else:
-		red = 329.698727446 * (red ** -0.1332047592)
-	if red < 0: red = 0
-	elif red > 255: red = 255
-		
-	# Process green
-	if temp <= 66:
-		green = temp
-		green = 99.4708025861 * log(green) - 161.1195681661
-		
-	else:
-		green = temp - 60
-		green = 288.1221695283 * (green ** -0.0755148492)
-	if green < 0: green = 0
-	if green > 255: green = 255
-	
-	# Process blue
-	if temp >= 66:
-		blue = 255
-	else:
-		if temp <= 19:
-			blue = 0
-		else:
-			blue = temp - 10
-			blue = 138.5177312231 * log(blue) - 305.0447927307
-			if blue < 0: blue = 0
-			if blue > 255: blue = 255
-	
-	return Color(red/255, green/255, blue/255, 1.0)
 
 # Loader functions
 
@@ -291,13 +252,25 @@ func _ready():
 		$UI/VBoxContainer/Camera/Light/HSlider4.set_value_no_signal(config["camera"]["light"]["strength"])
 		$UI/VBoxContainer/Camera/Light/HSlider2.set_value_no_signal(config["camera"]["light"]["rotation"])
 		$UI/VBoxContainer/Camera/Light/HSlider3.set_value_no_signal(config["camera"]["light"]["height"])
+		_on_light_color_changed(config["camera"]["light"]["temperature"])
+		_on_light_rotation_changed(config["camera"]["light"]["rotation"])
+		_on_light_up_down_changed(config["camera"]["light"]["height"])
+		_on_light_strength_change(config["camera"]["light"]["strength"])
+		
+		# Load tracker
+		if config["tracker"]["method"] >= 0:
+			$UI/VBoxContainer/Tracker/ItemList.select(config["tracker"]["method"])
+		$UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text = config["tracker"]["iphone_ip"]
+		$UI/VBoxContainer/Tracker/HSlider.set_value_no_signal(config["tracker"]["smoothing"])
+		
+		if config["tracker"]["method"] == 2:
+			$UI/VBoxContainer/Tracker/VBoxContainer.visible = true
 
 func _exit_tree():
 	var f = FileAccess.open("user://config.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(config, '  '))
 
-# Signal functions
-
+# Model signals
 func _on_model_selected(path):
 	# Unload any characters
 	if character:
@@ -360,7 +333,7 @@ func _on_facemesh_selected(index):
 	if $UI/VBoxContainer/Model/Settings/ItemList.get_selected_items():
 		face = skel.get_node($UI/VBoxContainer/Model/Settings/ItemList.get_item_text(
 			$UI/VBoxContainer/Model/Settings/ItemList.get_selected_items()[0]))
-		config["model"]["face"] = index
+		config["model"]["facemesh"] = index
 	else:
 		print("Could not find facemesh")
 
@@ -381,6 +354,81 @@ func _on_arm_angle_change(value):
 	skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
 	config["model"]["arm_angle"] = $UI/VBoxContainer/Model/Settings/HSlider.value
 
+func _on_load_button_pressed():
+	$UI/VBoxContainer/Model/FileDialog.visible = true
+
+func _on_hm_ratio_changed(value):
+	config["model"]["hm_ratio"] = value
+
+# Light signals
+func kelvin_to_rgb(temp):
+	# Function stolen from https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
+	var red = 0.0
+	var green = 0.0
+	var blue = 0.0
+	
+	# Process red
+	if temp <= 66:
+		red = 255
+	else:
+		red = 329.698727446 * (red ** -0.1332047592)
+	if red < 0: red = 0
+	elif red > 255: red = 255
+		
+	# Process green
+	if temp <= 66:
+		green = temp
+		green = 99.4708025861 * log(green) - 161.1195681661
+		
+	else:
+		green = temp - 60
+		green = 288.1221695283 * (green ** -0.0755148492)
+	if green < 0: green = 0
+	if green > 255: green = 255
+	
+	# Process blue
+	if temp >= 66:
+		blue = 255
+	else:
+		if temp <= 19:
+			blue = 0
+		else:
+			blue = temp - 10
+			blue = 138.5177312231 * log(blue) - 305.0447927307
+			if blue < 0: blue = 0
+			if blue > 255: blue = 255
+	
+	return Color(red/255, green/255, blue/255, 1.0)
+
+func _on_light_enable(toggled_on):
+	if toggled_on:
+		$UI/VBoxContainer/Camera/Light.visible = true
+		$DirectionalLight3D.visible = true
+		$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
+		config["camera"]["light"]["enabled"] = 1
+		
+	else:
+		$UI/VBoxContainer/Camera/Light.visible = false
+		$DirectionalLight3D.visible = false
+		config["camera"]["light"]["enabled"] = 0
+
+func _on_light_color_changed(value):
+	$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
+	config["camera"]["light"]["temperature"] = $UI/VBoxContainer/Camera/Light/HSlider.value
+
+func _on_light_rotation_changed(value):
+	$DirectionalLight3D.rotation.y = deg_to_rad(value)
+	config["camera"]["light"]["rotation"] = value
+
+func _on_light_up_down_changed(value):
+	$DirectionalLight3D.rotation.x = deg_to_rad(value)
+	config["camera"]["light"]["height"] =  value
+
+func _on_light_strength_change(value):
+	$DirectionalLight3D.light_energy = value
+	config["camera"]["light"]["strength"] = value
+
+# Tracker signals
 func _on_tracking_data_recived(new_data):
 	tracking_data = new_data
 
@@ -421,6 +469,7 @@ func _on_tracking_toggle(toggled_on):
 func _on_tracker_selected(index):
 	if $UI/VBoxContainer/Tracker/ItemList.get_selected_items():
 		$UI/VBoxContainer/Tracker/Button.disabled = false
+		config["tracker"]["method"] = index
 	else:
 		$UI/VBoxContainer/Tracker/Button.disabled = true
 		
@@ -442,39 +491,8 @@ func _on_position_reset():
 	rest_pose["Rotation"]["y"] = tracking_data["Rotation"]["y"]
 	rest_pose["Rotation"]["z"] = tracking_data["Rotation"]["z"]
 
-func _on_load_button_pressed():
-	$UI/VBoxContainer/Model/FileDialog.visible = true
+func _on_smoothing_changed(value):
+	config["tracker"]["smoothing"] = value
 
-
-# Light functions
-
-func _on_light_enable(toggled_on):
-	if toggled_on:
-		$UI/VBoxContainer/Camera/Light.visible = true
-		$DirectionalLight3D.visible = true
-		$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
-		config["camera"]["light"]["enabled"] = 1
-		
-	else:
-		$UI/VBoxContainer/Camera/Light.visible = false
-		$DirectionalLight3D.visible = false
-		config["camera"]["light"]["enabled"] = 0
-
-func _on_light_color_changed(value):
-	$DirectionalLight3D.set_color(kelvin_to_rgb($UI/VBoxContainer/Camera/Light/HSlider.value))
-	config["camera"]["light"]["temperature"] = $UI/VBoxContainer/Camera/Light/HSlider.value
-
-func _on_light_rotation_changed(value):
-	$DirectionalLight3D.rotation.y = deg_to_rad(value)
-	config["camera"]["light"]["rotation"] = value
-
-func _on_light_up_down_changed(value):
-	$DirectionalLight3D.rotation.x = deg_to_rad(value)
-	config["camera"]["light"]["height"] =  value
-
-func _on_light_strength_change(value):
-	$DirectionalLight3D.light_energy = value
-	config["camera"]["light"]["strength"] = value
-
-func _on_hm_ratio_changed(value):
-	config["model"]["hm_ratio"] = value
+func _on_iphone_ip_changed():
+	config["tracker"]["iphone_ip"] = $UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text
