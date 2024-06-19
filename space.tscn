@@ -45,12 +45,27 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.vrm", "*.fbx", "*.gltf", "*.glb", "*.blend")
 
-[node name="Button" type="Button" parent="UI/VBoxContainer/Model"]
+[node name="FileDialog2" type="FileDialog" parent="UI/VBoxContainer/Model"]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(635, 500)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.vrm", "*.fbx", "*.gltf", "*.glb", "*.blend")
+
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/VBoxContainer/Model"]
 layout_mode = 2
-text = "Load model"
+
+[node name="Button" type="Button" parent="UI/VBoxContainer/Model/HSplitContainer"]
+layout_mode = 2
+text = "Load character"
+
+[node name="Button2" type="Button" parent="UI/VBoxContainer/Model/HSplitContainer"]
+layout_mode = 2
+text = "Clear"
 
 [node name="Settings" type="VBoxContainer" parent="UI/VBoxContainer/Model"]
-visible = false
 layout_mode = 2
 
 [node name="Label2" type="Label" parent="UI/VBoxContainer/Model/Settings"]
@@ -81,6 +96,17 @@ layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.3
+
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/VBoxContainer/Model/Settings"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="UI/VBoxContainer/Model/Settings/HSplitContainer"]
+layout_mode = 2
+text = "Load secondary"
+
+[node name="Button2" type="Button" parent="UI/VBoxContainer/Model/Settings/HSplitContainer"]
+layout_mode = 2
+text = "Clear"
 
 [node name="Camera" type="VBoxContainer" parent="UI/VBoxContainer"]
 layout_mode = 2
@@ -231,10 +257,14 @@ visible = false
 sky_mode = 1
 
 [connection signal="file_selected" from="UI/VBoxContainer/Model/FileDialog" to="." method="_on_model_selected"]
-[connection signal="pressed" from="UI/VBoxContainer/Model/Button" to="." method="_on_load_button_pressed"]
+[connection signal="file_selected" from="UI/VBoxContainer/Model/FileDialog2" to="." method="_on_secondary_selected"]
+[connection signal="pressed" from="UI/VBoxContainer/Model/HSplitContainer/Button" to="." method="_on_load_button_pressed"]
+[connection signal="pressed" from="UI/VBoxContainer/Model/HSplitContainer/Button2" to="." method="_on_clear_model_pressed"]
 [connection signal="item_selected" from="UI/VBoxContainer/Model/Settings/ItemList" to="." method="_on_facemesh_selected"]
 [connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider" to="." method="_on_arm_angle_change"]
 [connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider2" to="." method="_on_hm_ratio_changed"]
+[connection signal="pressed" from="UI/VBoxContainer/Model/Settings/HSplitContainer/Button" to="." method="_on_load_secondary_pressed"]
+[connection signal="pressed" from="UI/VBoxContainer/Model/Settings/HSplitContainer/Button2" to="." method="_on_clear_secondary_pressed"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider" to="." method="_on_camera_change"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider2" to="." method="_on_camera_change"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider3" to="." method="_on_camera_change"]

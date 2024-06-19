@@ -1,19 +1,32 @@
 extends Node3D
 
 var character = null
-var face = null
-var skel = null
+var secondary = null
 var is_vrm = 0
+var secondary_is_vrm = 0
+
+var skel = null
+var face = null
+var head = null
+var hips = null
 var left_arm = null
 var right_arm = null
-var hips = null
+
+# Secondary for extra clothes
+var secondary_skel = null
+var secondary_head = null
+var secondary_hips = null
+var secondary_left_arm = null
+var secondary_right_arm = null
+
 var initial_hip_pos = Vector3(0.0, 0.0, 0.0)
-var head = null
+
 var tracker = null
 
 var config = {
 		"model": {
 			"path": "",
+			"secondary_path": "",
 			"facemesh": 1,
 			"arm_angle": 0,
 			"hm_ratio": 0.0
@@ -140,10 +153,6 @@ func load_model(path: String) -> Node3D:
 	gltf.append_from_buffer(model, "", gltf_state, 8)
 	var generated_scene = gltf.generate_scene(gltf_state)
 	
-	is_vrm = 0
-	
-	config["model"]["path"] = path
-	
 	return generated_scene
 
 func load_vrm_model(path: String) -> Node3D:
@@ -165,26 +174,29 @@ func load_vrm_model(path: String) -> Node3D:
 	var generated_scene = gltf.generate_scene(state)
 	gltf.unregister_gltf_document_extension(vrm_extension)
 	
-	is_vrm = 1
-	config["model"]["path"] = path
-	
 	return generated_scene
 
 
 # Process stuff
-func _physics_process(delta):
+func _physics_process(_delta):
 		if skel:
 			# Process bone rotations
 			var tmp = Vector3(
 					tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
 					tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
-					tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
+					-tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
 				) + initial_hip_pos
 				
 			skel.set_bone_pose_position(hips, 
 				skel.get_bone_pose_position(hips) * $UI/VBoxContainer/Tracker/HSlider.value + 
 				tmp * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
 			)
+			
+			if secondary:
+				secondary_skel.set_bone_pose_position(secondary_hips, 
+					secondary_skel.get_bone_pose_position(secondary_hips) * $UI/VBoxContainer/Tracker/HSlider.value + 
+					tmp * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
+				)
 			
 			tmp = Quaternion.from_euler(Vector3(
 					tracking_data["Rotation"]["x"] - rest_pose["Rotation"]["x"],
@@ -197,6 +209,12 @@ func _physics_process(delta):
 				tmp * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
 			)
 			
+			if secondary:
+				secondary_skel.set_bone_pose_rotation(secondary_hips, 
+					secondary_skel.get_bone_pose_rotation(secondary_hips) * $UI/VBoxContainer/Tracker/HSlider.value + 
+					tmp * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
+				)
+			
 			tmp = Quaternion.from_euler(Vector3(
 					tracking_data["Rotation"]["x"] - rest_pose["Rotation"]["x"],
 					tracking_data["Rotation"]["y"] - rest_pose["Rotation"]["y"],
@@ -207,6 +225,12 @@ func _physics_process(delta):
 				skel.get_bone_pose_rotation(head) * $UI/VBoxContainer/Tracker/HSlider.value + 
 				tmp * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
 			)
+			
+			if secondary:
+				secondary_skel.set_bone_pose_rotation(secondary_head, 
+					secondary_skel.get_bone_pose_rotation(secondary_head) * $UI/VBoxContainer/Tracker/HSlider.value + 
+					tmp * (1.0 - $UI/VBoxContainer/Tracker/HSlider.value)
+				)
 			
 		if face:
 			# Process blendshapes
@@ -232,6 +256,9 @@ func _ready():
 		# Load character if any.
 		if config["model"]["path"] != "":
 			_on_model_selected(config["model"]["path"])
+		
+		if config["model"]["secondary_path"] != "":
+			_on_secondary_selected(config["model"]["secondary_path"])
 		
 		if character:
 			$UI/VBoxContainer/Model/Settings/ItemList.select(config["model"]["facemesh"])
@@ -274,19 +301,16 @@ func _exit_tree():
 func _on_model_selected(path):
 	# Unload any characters
 	if character:
-		$UI/VBoxContainer/Model/Settings.visible = false
-		character.queue_free()
-		character = null
-		skel = null
-		face = null
-		$UI/VBoxContainer/Model/Settings/ItemList.clear()
+		_on_clear_model_pressed()
 	
 	if not FileAccess.open(path, FileAccess.READ):
 		return
 	
 	if 'vrm' in path:
+		is_vrm = 1
 		character = load_vrm_model(path)
 	else:
+		is_vrm = 0
 		character = load_model(path)
 	
 	if not character:
@@ -309,7 +333,7 @@ func _on_model_selected(path):
 		character.queue_free()
 		$UI/VBoxContainer/Model/Settings.visible = false
 		return
-		
+	
 	# Get arm bones for angle
 	for i in skel.get_bone_count():
 		if 'arm' in skel.get_bone_name(i).to_lower():
@@ -328,6 +352,59 @@ func _on_model_selected(path):
 			$UI/VBoxContainer/Model/Settings/ItemList.add_item(m.name)
 	
 	config["model"]["path"] = path
+	_on_arm_angle_change($UI/VBoxContainer/Model/Settings/HSlider.value)
+	
+func _on_secondary_selected(path):
+	# Unload any current
+	if secondary:
+		_on_clear_secondary_pressed()
+	
+	if not FileAccess.open(path, FileAccess.READ):
+		return
+	
+	if 'vrm' in path:
+		secondary_is_vrm = 1
+		secondary = load_vrm_model(path)
+	else:
+		secondary_is_vrm = 0
+		secondary = load_model(path)
+	
+	if not secondary:
+		return
+	
+	add_child(secondary)
+	for n in secondary.get_children():
+		if n is Skeleton3D:
+			secondary_skel = n
+			break
+			
+		for nn in n.get_children():
+			if nn is Skeleton3D:
+				secondary_skel = nn
+				$UI/VBoxContainer/Model/Settings.visible = true
+				
+	if not secondary_skel:
+		print("Could not find skel")
+		secondary.queue_free()
+		return
+	
+	# Get arm bones for angle
+	for i in secondary_skel.get_bone_count():
+		if 'arm' in secondary_skel.get_bone_name(i).to_lower():
+			if 'L' in secondary_skel.get_bone_name(i) and 'lower' not in secondary_skel.get_bone_name(i).to_lower() and 'twist' not in secondary_skel.get_bone_name(i).to_lower() and not secondary_left_arm:
+				secondary_left_arm = i
+				
+			if 'R' in secondary_skel.get_bone_name(i) and 'lower' not in secondary_skel.get_bone_name(i).to_lower() and 'twist' not in secondary_skel.get_bone_name(i).to_lower() and not secondary_right_arm:
+				secondary_right_arm = i
+				
+		if 'head' in secondary_skel.get_bone_name(i).to_lower():
+			secondary_head = i
+			
+		if 'hips' in secondary_skel.get_bone_name(i).to_lower():
+			secondary_hips = i
+	
+	config["model"]["secondary_path"] = path
+	_on_arm_angle_change($UI/VBoxContainer/Model/Settings/HSlider.value)
 
 func _on_facemesh_selected(index):
 	if $UI/VBoxContainer/Model/Settings/ItemList.get_selected_items():
@@ -353,9 +430,16 @@ func _on_arm_angle_change(value):
 	skel.set_bone_pose_rotation(left_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
 	skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
 	config["model"]["arm_angle"] = $UI/VBoxContainer/Model/Settings/HSlider.value
+	
+	if secondary:
+		secondary_skel.set_bone_pose_rotation(secondary_left_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + secondary_is_vrm * (PI/2), secondary_is_vrm * PI, 0.0)))
+		secondary_skel.set_bone_pose_rotation(secondary_right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + secondary_is_vrm * (PI/2), secondary_is_vrm * PI, 0.0)))
 
 func _on_load_button_pressed():
 	$UI/VBoxContainer/Model/FileDialog.visible = true
+
+func _on_load_secondary_pressed():
+	$UI/VBoxContainer/Model/FileDialog2.visible = true
 
 func _on_hm_ratio_changed(value):
 	config["model"]["hm_ratio"] = value
@@ -496,3 +580,29 @@ func _on_smoothing_changed(value):
 
 func _on_iphone_ip_changed():
 	config["tracker"]["iphone_ip"] = $UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text
+
+func _on_clear_model_pressed():
+	if character:
+		$UI/VBoxContainer/Model/Settings.visible = false
+		character.queue_free()
+		character = null
+		skel = null
+		face = null
+		hips = null
+		head = null
+		left_arm = null
+		right_arm = null
+		$UI/VBoxContainer/Model/Settings/ItemList.clear()
+	config["model"]["path"] = ""
+
+
+func _on_clear_secondary_pressed():
+	if secondary:
+		secondary.queue_free()
+		secondary = null
+		secondary_skel = null
+		secondary_hips = null
+		secondary_head = null
+		secondary_left_arm = null
+		secondary_right_arm = null
+	config["model"]["secondary_path"] = ""
