@@ -290,7 +290,7 @@ func _ready():
 		$UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text = config["tracker"]["iphone_ip"]
 		$UI/VBoxContainer/Tracker/HSlider.set_value_no_signal(config["tracker"]["smoothing"])
 		
-		if config["tracker"]["method"] == 2 or config["tracker"]["method"] == 3:
+		if config["tracker"]["method"] == 1 or config["tracker"]["method"] == 2:
 			$UI/VBoxContainer/Tracker/VBoxContainer.visible = true
 
 func _exit_tree():
@@ -533,7 +533,7 @@ func _on_tracking_toggle(toggled_on):
 			add_child(tracker)
 			tracker.connect("publish_new_data", _on_tracking_data_recived)
 			
-		elif t == 2:
+		elif t == 1:
 			if not $UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text.is_valid_ip_address():
 				return
 				
@@ -542,8 +542,7 @@ func _on_tracking_toggle(toggled_on):
 			tracker.connect("publish_new_data", _on_tracking_data_recived)
 			tracker.start_poller($UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text)
 		
-		elif t == 3:
-			print("start")
+		elif t == 2:
 			if not $UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text.is_valid_ip_address():
 				return
 				
@@ -571,7 +570,7 @@ func _on_tracker_selected(index):
 	if $UI/VBoxContainer/Tracker/ItemList.get_selected_items():
 		t = $UI/VBoxContainer/Tracker/ItemList.get_selected_items()[0]
 		
-	if t == 2 or t == 3:
+	if t == 1 or t == 2:
 		$UI/VBoxContainer/Tracker/VBoxContainer.visible = true
 		
 	else:
