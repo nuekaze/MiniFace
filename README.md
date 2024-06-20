@@ -15,21 +15,22 @@ The tracker currently only supports external ARKit trackers.
 - VTube Studio (iPhone)
 - MeowFace (Android) (Use VTube Studio option in tracker)
 - [mediapipe-vt](https://github.com/nuekaze/mediapipe-vt) (webcam)
+- iFacialMocap (iPhone)
 
 There are plans to make webcam trackers built in instead of being external.
-OpenSeeFace will not be implemented unless someone gives me code to convert the OSF format to vowels.
 
 ## Model preperation
 This tracker supports the following formats.
 - vrm
 - glb
 - gltf
-- fbx
-- blend
-
-There is a bug when you load a VRM model and the arm slider moves some random bone instead of the arms. If you restart the program it should fix itself.
+- fbx (maybe works)
+- blend (maybe works)
 
 If you use VRM, springbones will work as you configure them.
+
+### Secondary model
+You can a secondary model that will track just as the main model. This can be useful if you have multiple clothes you want switch between.
 
 ## How to run the latest
 Easiest way to run the latest.
@@ -40,13 +41,9 @@ Easiest way to run the latest.
 
 Right now I have no scroll for the menu so you just have to make the window taller to see all options if they are hidden.
 
-## Good to know
-Because I developed this for my own models, all ARKit blendshape names use lowercase first letter. If your model has uppercase first letters it will not work. To fix this you can remove line 108 in trackers/vtube-studio.gd. If you use mediapipe-vt, lowercase is the default. To fix that you can instead add that line after line 105 in trackers/mediapipe-vt.gd.
-
-I will fix this at some point to make it work regardless of uppercase or lowercase.
-
 ## Future plans
 - Automatically add spring bones on any bone named "hair", "tail", "skirt". (not for VRM)
-- OSF support.
-- Supply OSF and mediapipe-vt directly in the program without external setup.
-- Native transparency instead of greenscreen. (This may already work in Windows. I have not tested it.)
+- Supply mediapipe-vt directly in the program without external setup.
+- Native transparency instead of greenscreen. (Already works in Windows. Changing project settings makes it work on Linux as well.)
+
+OSF is scrapped. Instead I will try implement an ARKit to vowels conversion method. For webcam you can use mediapipe-vt for this.
