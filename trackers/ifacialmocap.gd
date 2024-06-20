@@ -86,27 +86,34 @@ var data = {
 
 func _listening_thread():
 	var server := UDPServer.new()
-	server.listen(50506)
+	server.listen(49983)
 	
 	while running:
 		server.poll()
 		if server.is_connection_available():
 			var peer = server.take_connection()
 			var packet = peer.get_packet()
+			var d = packet.get_string_from_utf8()
+			
+			if d:
+				d = d.split("|")
+				for i in 52:
+					var t = d[i+1].split("-")
+					var key = t[0]
+					var val = t[1]
+					key = key.replace("_R", "Right").replace("_L", "Left")
+					val = float(val) / 100.0
 
-			var json = JSON.new()
-			if json.parse(packet.get_string_from_utf8()) == OK:
-				data["Position"]["x"] = -json.data["Position"]["x"] / 100
-				data["Position"]["y"] = json.data["Position"]["y"] / 100
-				data["Position"]["z"] = -json.data["Position"]["z"] / 100
+					data["Blendshapes"][key] = val
+
+				var pos_rots = d[54].split('#')[1].split(',')
+				data["Position"]['x'] = float(pos_rots[3])
+				data["Position"]['y'] = float(pos_rots[4])
+				data["Position"]['z'] = float(pos_rots[5])
 				
-				data["Rotation"]["x"] = deg_to_rad(json.data["Rotation"]["y"])
-				data["Rotation"]["y"] = deg_to_rad(json.data["Rotation"]["x"])
-				data["Rotation"]["z"] = deg_to_rad(json.data["Rotation"]["z"])
-				
-				for s in json.data["BlendShapes"]:
-					s["k"][0] = s["k"][0].to_lower() # I use lowercase first letter in my model
-					data["Blendshapes"][s["k"]] = s["v"]
+				data["Rotation"]['x'] = deg_to_rad(float(pos_rots[0]))
+				data["Rotation"]['y'] = deg_to_rad(float(pos_rots[1]))
+				data["Rotation"]['z'] = deg_to_rad(float(pos_rots[2]))
 				
 				emit_signal("publish_new_data", data)
 		
@@ -121,7 +128,7 @@ func _ready():
 	
 	
 func start_poller(ip):
-	client.connect_to_host(ip, 21412)
+	client.connect_to_host(ip, 49983)
 	$PollTimer.start(1.0)
 
 func _exit_tree():
@@ -129,4 +136,4 @@ func _exit_tree():
 	listening_thread.wait_to_finish()
 
 func _on_poll():
-	client.put_packet('{"messageType": "iOSTrackingDataRequest", "sentBy": "Godot", "sendForSeconds": 10, "ports": [50506]}'.to_utf8_buffer())
+	client.put_packet('iFacialMocap_sahuasouryya9218sauhuiayeta91555dy3719'.to_utf8_buffer())

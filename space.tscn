@@ -195,6 +195,16 @@ layout_mode = 2
 min_value = -90.0
 max_value = 90.0
 
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/VBoxContainer/Camera"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/VBoxContainer/Camera/HSplitContainer"]
+layout_mode = 2
+text = "Transparent BG"
+
+[node name="CheckButton" type="CheckButton" parent="UI/VBoxContainer/Camera/HSplitContainer"]
+layout_mode = 2
+
 [node name="Tracker" type="VBoxContainer" parent="UI/VBoxContainer"]
 layout_mode = 2
 
@@ -213,8 +223,6 @@ item_1/selectable = false
 item_1/disabled = true
 item_2/text = "VTube Studio"
 item_3/text = "iFacialMocap"
-item_3/selectable = false
-item_3/disabled = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UI/VBoxContainer/Tracker"]
 visible = false
@@ -273,6 +281,7 @@ sky_mode = 1
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider4" to="." method="_on_light_strength_change"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider2" to="." method="_on_light_rotation_changed"]
 [connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider3" to="." method="_on_light_up_down_changed"]
+[connection signal="toggled" from="UI/VBoxContainer/Camera/HSplitContainer/CheckButton" to="." method="_on_toggle_transparency"]
 [connection signal="item_selected" from="UI/VBoxContainer/Tracker/ItemList" to="." method="_on_tracker_selected"]
 [connection signal="text_changed" from="UI/VBoxContainer/Tracker/VBoxContainer/TextEdit" to="." method="_on_iphone_ip_changed"]
 [connection signal="value_changed" from="UI/VBoxContainer/Tracker/HSlider" to="." method="_on_smoothing_changed"]

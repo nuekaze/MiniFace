@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dxuicrs2iqbdj"]
+
+[ext_resource type="Script" path="res://trackers/ifacialmocap.gd" id="1_7orw3"]
+
+[node name="iFacialMocap" type="Node"]
+script = ExtResource("1_7orw3")
+
+[node name="PollTimer" type="Timer" parent="."]
+
+[connection signal="timeout" from="PollTimer" to="." method="_on_poll"]

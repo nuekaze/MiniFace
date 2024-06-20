@@ -184,7 +184,7 @@ func _physics_process(_delta):
 			var tmp = Vector3(
 					tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
 					tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
-					-tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
+					tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
 				) + initial_hip_pos
 				
 			skel.set_bone_pose_position(hips, 
@@ -290,7 +290,7 @@ func _ready():
 		$UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text = config["tracker"]["iphone_ip"]
 		$UI/VBoxContainer/Tracker/HSlider.set_value_no_signal(config["tracker"]["smoothing"])
 		
-		if config["tracker"]["method"] == 2:
+		if config["tracker"]["method"] == 2 or config["tracker"]["method"] == 3:
 			$UI/VBoxContainer/Tracker/VBoxContainer.visible = true
 
 func _exit_tree():
@@ -541,6 +541,16 @@ func _on_tracking_toggle(toggled_on):
 			add_child(tracker)
 			tracker.connect("publish_new_data", _on_tracking_data_recived)
 			tracker.start_poller($UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text)
+		
+		elif t == 3:
+			print("start")
+			if not $UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text.is_valid_ip_address():
+				return
+				
+			tracker = load("res://trackers/ifacialmocap.tscn").instantiate()
+			add_child(tracker)
+			tracker.connect("publish_new_data", _on_tracking_data_recived)
+			tracker.start_poller($UI/VBoxContainer/Tracker/VBoxContainer/TextEdit.text)
 			
 	else:
 		# Stop all tracking
@@ -561,7 +571,7 @@ func _on_tracker_selected(index):
 	if $UI/VBoxContainer/Tracker/ItemList.get_selected_items():
 		t = $UI/VBoxContainer/Tracker/ItemList.get_selected_items()[0]
 		
-	if t == 2:
+	if t == 2 or t == 3:
 		$UI/VBoxContainer/Tracker/VBoxContainer.visible = true
 		
 	else:
@@ -606,3 +616,15 @@ func _on_clear_secondary_pressed():
 		secondary_left_arm = null
 		secondary_right_arm = null
 	config["model"]["secondary_path"] = ""
+
+func _on_toggle_transparency(toggled_on):
+	ProjectSettings.set_setting("display/window/size/transparent", toggled_on)
+	ProjectSettings.set_setting("rendering/viewport/transparent_background", toggled_on)
+	ProjectSettings.set_setting("display/window/per_pixel_transparency/allowed", toggled_on)
+	
+	if toggled_on:
+		$Camera3D.environment = null
+	else:
+		$Camera3D.environment = Environment.new()
+		$Camera3D.environment.background_mode = 1
+		$Camera3D.environment.background_color = Color(0, 1, 0, 0)
