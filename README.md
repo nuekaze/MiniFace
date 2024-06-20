@@ -15,6 +15,7 @@ The tracker currently only supports external ARKit trackers.
 - VTube Studio (iPhone)
 - MeowFace (Android) (Use VTube Studio option in tracker)
 - [mediapipe-vt](https://github.com/nuekaze/mediapipe-vt) (webcam)
+- iFacialMocap (iPhone)
 
 There are plans to make webcam trackers built in instead of being external.
 OpenSeeFace will not be implemented unless someone gives me code to convert the OSF format to vowels.
