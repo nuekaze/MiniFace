@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://uve31ukeyxpw"]
+
+[ext_resource type="Script" path="res://trackers/vmc-receiver.gd" id="1_yfgvw"]
+
+[node name="VMC-Receiver" type="Node"]
+script = ExtResource("1_yfgvw")

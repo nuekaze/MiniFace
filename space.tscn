@@ -26,17 +26,17 @@ grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_rjrao")
 script = ExtResource("1_v7e47")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI"]
+[node name="Top" type="VBoxContainer" parent="UI"]
 layout_mode = 2
 
-[node name="Model" type="VBoxContainer" parent="UI/VBoxContainer"]
+[node name="Model" type="VBoxContainer" parent="UI/Top"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Model"]
+[node name="Label" type="Label" parent="UI/Top/Model"]
 layout_mode = 2
 text = "Model"
 
-[node name="FileDialog" type="FileDialog" parent="UI/VBoxContainer/Model"]
+[node name="PrimarySelectDialog" type="FileDialog" parent="UI/Top/Model"]
 title = "Open a File"
 initial_position = 2
 size = Vector2i(635, 500)
@@ -45,7 +45,7 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.vrm", "*.fbx", "*.gltf", "*.glb", "*.blend")
 
-[node name="FileDialog2" type="FileDialog" parent="UI/VBoxContainer/Model"]
+[node name="SecondarySelectDialog" type="FileDialog" parent="UI/Top/Model"]
 title = "Open a File"
 initial_position = 2
 size = Vector2i(635, 500)
@@ -54,165 +54,176 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.vrm", "*.fbx", "*.gltf", "*.glb", "*.blend")
 
-[node name="HSplitContainer" type="HSplitContainer" parent="UI/VBoxContainer/Model"]
+[node name="LoadClearButtons" type="HSplitContainer" parent="UI/Top/Model"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="UI/VBoxContainer/Model/HSplitContainer"]
+[node name="Load" type="Button" parent="UI/Top/Model/LoadClearButtons"]
 layout_mode = 2
 text = "Load character"
 
-[node name="Button2" type="Button" parent="UI/VBoxContainer/Model/HSplitContainer"]
+[node name="Clear" type="Button" parent="UI/Top/Model/LoadClearButtons"]
 layout_mode = 2
 text = "Clear"
 
-[node name="Settings" type="VBoxContainer" parent="UI/VBoxContainer/Model"]
+[node name="Settings" type="VBoxContainer" parent="UI/Top/Model"]
+visible = false
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="UI/VBoxContainer/Model/Settings"]
+[node name="SecondaryLoadClearButtons" type="HSplitContainer" parent="UI/Top/Model/Settings"]
+layout_mode = 2
+
+[node name="Load" type="Button" parent="UI/Top/Model/Settings/SecondaryLoadClearButtons"]
+layout_mode = 2
+text = "Load secondary"
+
+[node name="Clear" type="Button" parent="UI/Top/Model/Settings/SecondaryLoadClearButtons"]
+layout_mode = 2
+text = "Clear"
+
+[node name="FacemeshLabel" type="Label" parent="UI/Top/Model/Settings"]
 layout_mode = 2
 text = "Facemesh"
 
-[node name="ItemList" type="ItemList" parent="UI/VBoxContainer/Model/Settings"]
+[node name="FacemeshList" type="ItemList" parent="UI/Top/Model/Settings"]
 layout_mode = 2
 auto_height = true
 item_count = 1
 item_0/text = ""
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Model/Settings"]
+[node name="ArmAngleLabel" type="Label" parent="UI/Top/Model/Settings"]
 layout_mode = 2
 text = "Arm angle"
 
-[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Model/Settings"]
+[node name="ArmAngle" type="HSlider" parent="UI/Top/Model/Settings"]
 layout_mode = 2
+min_value = -90.0
 max_value = 90.0
-value = 70.0
+value = 90.0
 
-[node name="Label3" type="Label" parent="UI/VBoxContainer/Model/Settings"]
+[node name="HTBRLabel" type="Label" parent="UI/Top/Model/Settings"]
 layout_mode = 2
 text = "Head to body move ratio"
 
-[node name="HSlider2" type="HSlider" parent="UI/VBoxContainer/Model/Settings"]
+[node name="HeadToBodyRatio" type="HSlider" parent="UI/Top/Model/Settings"]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.3
 
-[node name="HSplitContainer" type="HSplitContainer" parent="UI/VBoxContainer/Model/Settings"]
+[node name="Live2DStyleMovement" type="HBoxContainer" parent="UI/Top/Model/Settings"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="UI/VBoxContainer/Model/Settings/HSplitContainer"]
+[node name="Label" type="Label" parent="UI/Top/Model/Settings/Live2DStyleMovement"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-text = "Load secondary"
+text = "Live2D-like"
 
-[node name="Button2" type="Button" parent="UI/VBoxContainer/Model/Settings/HSplitContainer"]
-layout_mode = 2
-text = "Clear"
-
-[node name="Camera" type="VBoxContainer" parent="UI/VBoxContainer"]
+[node name="Toggle" type="CheckButton" parent="UI/Top/Model/Settings/Live2DStyleMovement"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Camera"]
+[node name="Camera" type="VBoxContainer" parent="UI/Top"]
+layout_mode = 2
+
+[node name="PositionLabel" type="Label" parent="UI/Top/Camera"]
 layout_mode = 2
 text = "Camera Position"
 
-[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Camera"]
+[node name="Position" type="HSlider" parent="UI/Top/Camera"]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 
-[node name="Label2" type="Label" parent="UI/VBoxContainer/Camera"]
+[node name="DistanceLabel" type="Label" parent="UI/Top/Camera"]
 layout_mode = 2
 text = "Camera Distance
 "
 
-[node name="HSlider2" type="HSlider" parent="UI/VBoxContainer/Camera"]
+[node name="Distance" type="HSlider" parent="UI/Top/Camera"]
 layout_mode = 2
 max_value = 2.0
 step = 0.01
 value = 1.0
 
-[node name="Label3" type="Label" parent="UI/VBoxContainer/Camera"]
+[node name="HeightLabel" type="Label" parent="UI/Top/Camera"]
 layout_mode = 2
 text = "Camera Height
 "
 
-[node name="HSlider3" type="HSlider" parent="UI/VBoxContainer/Camera"]
+[node name="Height" type="HSlider" parent="UI/Top/Camera"]
 layout_mode = 2
-min_value = 1.0
 max_value = 2.0
 step = 0.01
 value = 1.7
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/VBoxContainer/Camera"]
+[node name="Light" type="HBoxContainer" parent="UI/Top/Camera"]
 layout_mode = 2
 
-[node name="Label4" type="Label" parent="UI/VBoxContainer/Camera/HBoxContainer"]
-custom_minimum_size = Vector2(80.02, 2.08165e-12)
+[node name="Label" type="Label" parent="UI/Top/Camera/Light"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 text = "Light"
 
-[node name="CheckButton" type="CheckButton" parent="UI/VBoxContainer/Camera/HBoxContainer"]
+[node name="Toggle" type="CheckButton" parent="UI/Top/Camera/Light"]
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="Light" type="VBoxContainer" parent="UI/VBoxContainer/Camera"]
-visible = false
+[node name="LightSettings" type="VBoxContainer" parent="UI/Top/Camera"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Camera/Light"]
+[node name="TemperatureLabel" type="Label" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 text = "Temperature"
 
-[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Camera/Light"]
+[node name="Temperature" type="HSlider" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 max_value = 200.0
 
-[node name="Label4" type="Label" parent="UI/VBoxContainer/Camera/Light"]
+[node name="StrengthLabel" type="Label" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 text = "Strength"
 
-[node name="HSlider4" type="HSlider" parent="UI/VBoxContainer/Camera/Light"]
+[node name="Strength" type="HSlider" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 max_value = 3.0
 step = 0.01
 value = 1.0
 
-[node name="Label2" type="Label" parent="UI/VBoxContainer/Camera/Light"]
+[node name="RotationLabel" type="Label" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 text = "Rotation"
 
-[node name="HSlider2" type="HSlider" parent="UI/VBoxContainer/Camera/Light"]
+[node name="Rotation" type="HSlider" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 
-[node name="Label3" type="Label" parent="UI/VBoxContainer/Camera/Light"]
+[node name="HeightLabel" type="Label" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 text = "Height"
 
-[node name="HSlider3" type="HSlider" parent="UI/VBoxContainer/Camera/Light"]
+[node name="Height" type="HSlider" parent="UI/Top/Camera/LightSettings"]
 layout_mode = 2
 min_value = -90.0
 max_value = 90.0
 
-[node name="HSplitContainer" type="HSplitContainer" parent="UI/VBoxContainer/Camera"]
+[node name="TransparentBG" type="HSplitContainer" parent="UI/Top/Camera"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Camera/HSplitContainer"]
+[node name="Label" type="Label" parent="UI/Top/Camera/TransparentBG"]
 layout_mode = 2
 text = "Transparent BG"
 
-[node name="CheckButton" type="CheckButton" parent="UI/VBoxContainer/Camera/HSplitContainer"]
+[node name="Toggle" type="CheckButton" parent="UI/Top/Camera/TransparentBG"]
 layout_mode = 2
 
-[node name="Tracker" type="VBoxContainer" parent="UI/VBoxContainer"]
+[node name="Tracker" type="VBoxContainer" parent="UI/Top"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Tracker"]
+[node name="TrackerLabel" type="Label" parent="UI/Top/Tracker"]
 layout_mode = 2
 text = "Tracker"
 
-[node name="ItemList" type="ItemList" parent="UI/VBoxContainer/Tracker"]
+[node name="TrackersAvailable" type="ItemList" parent="UI/Top/Tracker"]
 layout_mode = 2
 allow_search = false
 auto_height = true
@@ -221,35 +232,55 @@ item_0/text = "Mediapipe-VT"
 item_1/text = "VTube Studio"
 item_2/text = "iFacialMocap"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/VBoxContainer/Tracker"]
+[node name="PhoneSettings" type="VBoxContainer" parent="UI/Top/Tracker"]
 visible = false
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/Tracker/VBoxContainer"]
+[node name="Label" type="Label" parent="UI/Top/Tracker/PhoneSettings"]
 layout_mode = 2
 text = "iPhone IP"
 
-[node name="TextEdit" type="TextEdit" parent="UI/VBoxContainer/Tracker/VBoxContainer"]
+[node name="IP" type="TextEdit" parent="UI/Top/Tracker/PhoneSettings"]
 custom_minimum_size = Vector2(0, 34.535)
 layout_mode = 2
 placeholder_text = "127.0.0.1"
 
-[node name="Label2" type="Label" parent="UI/VBoxContainer/Tracker"]
+[node name="VMC" type="HSplitContainer" parent="UI/Top/Tracker"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Top/Tracker/VMC"]
+layout_mode = 2
+text = "Receive VMC (exp)"
+
+[node name="Activated" type="CheckButton" parent="UI/Top/Tracker/VMC"]
+layout_mode = 2
+
+[node name="VowelsCompability" type="HSplitContainer" parent="UI/Top/Tracker"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Top/Tracker/VowelsCompability"]
+layout_mode = 2
+text = "Vowel compability"
+
+[node name="Toggle" type="CheckButton" parent="UI/Top/Tracker/VowelsCompability"]
+layout_mode = 2
+
+[node name="SmoothingLabel" type="Label" parent="UI/Top/Tracker"]
 layout_mode = 2
 text = "Smoothing"
 
-[node name="HSlider" type="HSlider" parent="UI/VBoxContainer/Tracker"]
+[node name="Smoothing" type="HSlider" parent="UI/Top/Tracker"]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.3
 
-[node name="Button" type="Button" parent="UI/VBoxContainer/Tracker"]
+[node name="StartStop" type="Button" parent="UI/Top/Tracker"]
 layout_mode = 2
 toggle_mode = true
 text = "Start"
 
-[node name="Button2" type="Button" parent="UI/VBoxContainer/Tracker"]
+[node name="ResetRest" type="Button" parent="UI/Top/Tracker"]
 layout_mode = 2
 text = "Reset position"
 
@@ -261,26 +292,27 @@ current = true
 visible = false
 sky_mode = 1
 
-[connection signal="file_selected" from="UI/VBoxContainer/Model/FileDialog" to="." method="_on_model_selected"]
-[connection signal="file_selected" from="UI/VBoxContainer/Model/FileDialog2" to="." method="_on_secondary_selected"]
-[connection signal="pressed" from="UI/VBoxContainer/Model/HSplitContainer/Button" to="." method="_on_load_button_pressed"]
-[connection signal="pressed" from="UI/VBoxContainer/Model/HSplitContainer/Button2" to="." method="_on_clear_model_pressed"]
-[connection signal="item_selected" from="UI/VBoxContainer/Model/Settings/ItemList" to="." method="_on_facemesh_selected"]
-[connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider" to="." method="_on_arm_angle_change"]
-[connection signal="value_changed" from="UI/VBoxContainer/Model/Settings/HSlider2" to="." method="_on_hm_ratio_changed"]
-[connection signal="pressed" from="UI/VBoxContainer/Model/Settings/HSplitContainer/Button" to="." method="_on_load_secondary_pressed"]
-[connection signal="pressed" from="UI/VBoxContainer/Model/Settings/HSplitContainer/Button2" to="." method="_on_clear_secondary_pressed"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider" to="." method="_on_camera_change"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider2" to="." method="_on_camera_change"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/HSlider3" to="." method="_on_camera_change"]
-[connection signal="toggled" from="UI/VBoxContainer/Camera/HBoxContainer/CheckButton" to="." method="_on_light_enable"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider" to="." method="_on_light_color_changed"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider4" to="." method="_on_light_strength_change"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider2" to="." method="_on_light_rotation_changed"]
-[connection signal="value_changed" from="UI/VBoxContainer/Camera/Light/HSlider3" to="." method="_on_light_up_down_changed"]
-[connection signal="toggled" from="UI/VBoxContainer/Camera/HSplitContainer/CheckButton" to="." method="_on_toggle_transparency"]
-[connection signal="item_selected" from="UI/VBoxContainer/Tracker/ItemList" to="." method="_on_tracker_selected"]
-[connection signal="text_changed" from="UI/VBoxContainer/Tracker/VBoxContainer/TextEdit" to="." method="_on_iphone_ip_changed"]
-[connection signal="value_changed" from="UI/VBoxContainer/Tracker/HSlider" to="." method="_on_smoothing_changed"]
-[connection signal="toggled" from="UI/VBoxContainer/Tracker/Button" to="." method="_on_tracking_toggle"]
-[connection signal="pressed" from="UI/VBoxContainer/Tracker/Button2" to="." method="_on_position_reset"]
+[connection signal="file_selected" from="UI/Top/Model/PrimarySelectDialog" to="." method="_on_model_selected"]
+[connection signal="file_selected" from="UI/Top/Model/SecondarySelectDialog" to="." method="_on_secondary_selected"]
+[connection signal="pressed" from="UI/Top/Model/LoadClearButtons/Load" to="." method="_on_load_button_pressed"]
+[connection signal="pressed" from="UI/Top/Model/LoadClearButtons/Clear" to="." method="_on_clear_model_pressed"]
+[connection signal="pressed" from="UI/Top/Model/Settings/SecondaryLoadClearButtons/Load" to="." method="_on_load_secondary_pressed"]
+[connection signal="pressed" from="UI/Top/Model/Settings/SecondaryLoadClearButtons/Clear" to="." method="_on_clear_secondary_pressed"]
+[connection signal="item_selected" from="UI/Top/Model/Settings/FacemeshList" to="." method="_on_facemesh_selected"]
+[connection signal="value_changed" from="UI/Top/Model/Settings/ArmAngle" to="." method="_on_arm_angle_change"]
+[connection signal="value_changed" from="UI/Top/Model/Settings/HeadToBodyRatio" to="." method="_on_hm_ratio_changed"]
+[connection signal="value_changed" from="UI/Top/Camera/Position" to="." method="_on_camera_change"]
+[connection signal="value_changed" from="UI/Top/Camera/Distance" to="." method="_on_camera_change"]
+[connection signal="value_changed" from="UI/Top/Camera/Height" to="." method="_on_camera_change"]
+[connection signal="toggled" from="UI/Top/Camera/Light/Toggle" to="." method="_on_light_enable"]
+[connection signal="value_changed" from="UI/Top/Camera/LightSettings/Temperature" to="." method="_on_light_color_changed"]
+[connection signal="value_changed" from="UI/Top/Camera/LightSettings/Strength" to="." method="_on_light_strength_change"]
+[connection signal="value_changed" from="UI/Top/Camera/LightSettings/Rotation" to="." method="_on_light_rotation_changed"]
+[connection signal="value_changed" from="UI/Top/Camera/LightSettings/Height" to="." method="_on_light_up_down_changed"]
+[connection signal="toggled" from="UI/Top/Camera/TransparentBG/Toggle" to="." method="_on_toggle_transparency"]
+[connection signal="item_selected" from="UI/Top/Tracker/TrackersAvailable" to="." method="_on_tracker_selected"]
+[connection signal="text_changed" from="UI/Top/Tracker/PhoneSettings/IP" to="." method="_on_iphone_ip_changed"]
+[connection signal="toggled" from="UI/Top/Tracker/VMC/Activated" to="." method="_on_vmc_toggled"]
+[connection signal="value_changed" from="UI/Top/Tracker/Smoothing" to="." method="_on_smoothing_changed"]
+[connection signal="toggled" from="UI/Top/Tracker/StartStop" to="." method="_on_tracking_toggle"]
+[connection signal="pressed" from="UI/Top/Tracker/ResetRest" to="." method="_on_position_reset"]

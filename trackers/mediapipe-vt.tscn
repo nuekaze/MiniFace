@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://trackers/mediapipe-vt.gd" id="1_pdc5p"]
 
-[node name="Mediapipe-yt" type="Node"]
+[node name="Mediapipe-vt" type="Node"]
 script = ExtResource("1_pdc5p")
