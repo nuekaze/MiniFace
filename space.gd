@@ -431,7 +431,7 @@ func _on_model_selected(path):
 			$UI/Top/Model/Settings/FacemeshList.add_item(m.name)
 	
 	config["model"]["path"] = path
-	_on_arm_angle_change($UI/Top/Model/Settings/ArmAngle.value)
+	_on_arm_angle_change(config["model"]["arm_angle"])
 	
 func _on_secondary_selected(path):
 	# Unload any current
@@ -486,7 +486,7 @@ func _on_secondary_selected(path):
 		secondary_skel_bones[secondary_skel.get_bone_name(i)] = i
 	
 	config["model"]["secondary_path"] = path
-	_on_arm_angle_change($UI/Top/Model/Settings/ArmAngle.value)
+	_on_arm_angle_change(config["model"]["arm_angle"])
 
 func _on_facemesh_selected(index):
 	if $UI/Top/Model/Settings/FacemeshList.get_selected_items():
@@ -510,8 +510,6 @@ func _on_camera_change(value):
 
 func _on_arm_angle_change(value):
 	value = -value
-	#skel.set_bone_pose_rotation(left_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
-	#skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)) + is_vrm * (PI/2), is_vrm * PI, 0.0)))
 	skel.set_bone_pose_rotation(left_arm,  Quaternion.from_euler(Vector3(-deg_to_rad(float(value)), 0.0, 0.0)) * Quaternion(skel.get_bone_rest(left_arm).basis))
 	skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)), 0.0, 0.0)) * Quaternion(skel.get_bone_rest(right_arm).basis))
 	config["model"]["arm_angle"] = value
