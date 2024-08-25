@@ -31,7 +31,8 @@ var config = {
 			"secondary_path": "",
 			"facemesh": 1,
 			"arm_angle": 0,
-			"hm_ratio": 0.0
+			"hm_ratio": 0.0,
+			"live2d_movement": 0
 		},
 		"camera": {
 			"position": 0,
@@ -214,8 +215,14 @@ func _physics_process(_delta):
 					skel.get_bone_pose_position(hips) * $UI/Top/Tracker/Smoothing.value + 
 					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
 				)
-				
+
 				if secondary:
+					tmp = Vector3(
+						tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
+						tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
+						tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
+					) + secondary_skel.get_bone_rest(secondary_hips).origin
+					
 					secondary_skel.set_bone_pose_position(secondary_hips, 
 						secondary_skel.get_bone_pose_position(secondary_hips) * $UI/Top/Tracker/Smoothing.value + 
 						tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
@@ -512,7 +519,7 @@ func _on_arm_angle_change(value):
 	value = -value
 	skel.set_bone_pose_rotation(left_arm,  Quaternion.from_euler(Vector3(-deg_to_rad(float(value)), 0.0, 0.0)) * Quaternion(skel.get_bone_rest(left_arm).basis))
 	skel.set_bone_pose_rotation(right_arm, Quaternion.from_euler(Vector3(-deg_to_rad(float(value)), 0.0, 0.0)) * Quaternion(skel.get_bone_rest(right_arm).basis))
-	config["model"]["arm_angle"] = value
+	config["model"]["arm_angle"] = -value
 	
 	if secondary:
 		secondary_skel.set_bone_pose_rotation(secondary_left_arm, 
@@ -573,7 +580,7 @@ func kelvin_to_rgb(temp):
 
 func _on_light_enable(toggled_on):
 	if toggled_on:
-		$UI/Top/Camera/Light.visible = true
+		$UI/Top/Camera/LightSettings.visible = true
 		$DirectionalLight3D.visible = true
 		$DirectionalLight3D.set_color(kelvin_to_rgb($UI/Top/Camera/LightSettings/Temperature.value))
 		config["camera"]["light"]["enabled"] = 1
@@ -740,3 +747,9 @@ func _on_vmc_toggled(toggled_on):
 	else:
 		tracking_data.erase("VMC")
 		vmc_tracker.queue_free()
+
+func _on_live2d_movement_changed(toggled_on):
+	if toggled_on:
+		config["model"]["live2d_movement"] = 1
+	else:
+		config["model"]["live2d_movement"] = 0

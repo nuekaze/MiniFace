@@ -301,6 +301,7 @@ sky_mode = 1
 [connection signal="item_selected" from="UI/Top/Model/Settings/FacemeshList" to="." method="_on_facemesh_selected"]
 [connection signal="value_changed" from="UI/Top/Model/Settings/ArmAngle" to="." method="_on_arm_angle_change"]
 [connection signal="value_changed" from="UI/Top/Model/Settings/HeadToBodyRatio" to="." method="_on_hm_ratio_changed"]
+[connection signal="toggled" from="UI/Top/Model/Settings/Live2DStyleMovement/Toggle" to="." method="_on_live2d_movement_changed"]
 [connection signal="value_changed" from="UI/Top/Camera/Position" to="." method="_on_camera_change"]
 [connection signal="value_changed" from="UI/Top/Camera/Distance" to="." method="_on_camera_change"]
 [connection signal="value_changed" from="UI/Top/Camera/Height" to="." method="_on_camera_change"]
