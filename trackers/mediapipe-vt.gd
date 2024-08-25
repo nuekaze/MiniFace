@@ -12,16 +12,16 @@ const jvowels = ['あ', 'い', 'う', 'え', 'お']
 
 const normalizations = {
 	'a': 2, 
-	'i': 40, 
-	'u': 3, 
+	'i': 20, 
+	'u': 2, 
 	'e': 8, 
 	'o': 2
 	}
 
 const vowel_targets = {
 	"a": [0.5, 0.1],
-	"i": [0.01, 0.02],
-	"u": [0.1, -0.4],
+	"i": [0.1, 0.03],
+	"u": [0.1, -0.9],
 	"e": [0.15, 0.01],
 	"o": [0.5, -0.7]
 }
@@ -143,8 +143,6 @@ func _listening_thread():
 				var open = data["Blendshapes"]["jawOpen"]
 				var wide = (max(data["Blendshapes"]["mouthDimpleLeft"], data["Blendshapes"]["mouthDimpleRight"]) * 5 - data["Blendshapes"]["mouthPucker"])
 				
-				print([open, wide])
-				
 				data["Blendshapes"]["vowels"]["a"] = 0.0
 				data["Blendshapes"]["vowels"]["i"] = 0.0
 				data["Blendshapes"]["vowels"]["u"] = 0.0
@@ -169,20 +167,18 @@ func _listening_thread():
 				for s in range(5):
 					if scores[s] > scores[high] and scores[s] > 0.2:
 						high = s
-						
-				print(scores)
 				
 				data["Blendshapes"]["vowels"][vowels[high]] = scores[high]
 				data["Blendshapes"]["vowels"][jvowels[high]] = scores[high]
 				
-				data["Blendshapes"]["vowels"]["ウィンク"] = data["Blendshapes"]["eyeBlinkLeft"]
-				data["Blendshapes"]["vowels"]["ウィンク右"] = data["Blendshapes"]["eyeBlinkRight"]
+				data["Blendshapes"]["vowels"]["ウィンク"] = clamp(data["Blendshapes"]["eyeBlinkLeft"] * 3, 0.0, 1.0)
+				data["Blendshapes"]["vowels"]["ウィンク右"] = clamp(data["Blendshapes"]["eyeBlinkRight"] * 3, 0.0, 1.0)
 				
 				# Solve rotations for eyes
 				# Left eye
 				var q = Quaternion.from_euler(Vector3(
-					(PI/3) * (data["Blendshapes"]["eyeLookDownLeft"] - data["Blendshapes"]["eyeLookUpLeft"]),
-					(PI/3) * (data["Blendshapes"]["eyeLookOutLeft"] - data["Blendshapes"]["eyeLookInLeft"]),
+					(PI/4) * (data["Blendshapes"]["eyeLookDownLeft"] - data["Blendshapes"]["eyeLookUpLeft"]),
+					(PI/4) * (data["Blendshapes"]["eyeLookOutLeft"] - data["Blendshapes"]["eyeLookInLeft"]),
 					0.0
 				))
 				data["left_eye"]["x"] = q.x
