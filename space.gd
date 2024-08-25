@@ -199,7 +199,7 @@ func load_vrm_model(path: String) -> Node3D:
 
 # Process stuff
 func _physics_process(_delta):
-		if skel:
+		if skel and tracker != null:
 			# Only process bones from tracking data if VMC is disabled.
 			if not $UI/Top/Tracker/VMC/Activated.button_pressed:
 				# Bones are updated every frame for the smoothing feature to work.
@@ -209,8 +209,7 @@ func _physics_process(_delta):
 						tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
 						tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
 					) + skel.get_bone_rest(hips).origin
-					
-					
+				
 				skel.set_bone_pose_position(hips, 
 					skel.get_bone_pose_position(hips) * $UI/Top/Tracker/Smoothing.value + 
 					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
@@ -673,7 +672,9 @@ func _on_position_reset():
 	if $UI/Top/Tracker/VMC/Activated.button_pressed:
 		for bone in tracking_data["VMC"]:
 			if bone["Name"] == "Hips":
-				rest_pose["Position"] = bone["Position"]
+				rest_pose["Position"]["x"] = bone["Position"]["x"]
+				rest_pose["Position"]["y"] = bone["Position"]["y"]
+				rest_pose["Position"]["z"] = bone["Position"]["z"]
 				rest_pose["Rotation"] = Quaternion(
 					bone["Rotation"]["x"],
 					bone["Rotation"]["y"],
@@ -682,8 +683,12 @@ func _on_position_reset():
 				).get_euler()
 		
 	else:
-		rest_pose["Position"] = tracking_data["Position"]
-		rest_pose["Rotation"] = tracking_data["Rotation"]
+		rest_pose["Position"]["x"] = tracking_data["Position"]["x"]
+		rest_pose["Position"]["y"] = tracking_data["Position"]["y"]
+		rest_pose["Position"]["z"] = tracking_data["Position"]["z"]
+		rest_pose["Rotation"]["x"] = tracking_data["Rotation"]["x"]
+		rest_pose["Rotation"]["y"] = tracking_data["Rotation"]["y"]
+		rest_pose["Rotation"]["z"] = tracking_data["Rotation"]["z"]
 
 func _on_smoothing_changed(value):
 	config["tracker"]["smoothing"] = value
