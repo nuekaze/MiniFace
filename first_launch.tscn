@@ -1,0 +1,81 @@
+[gd_scene load_steps=4 format=3 uid="uid://canfnlbk8kar5"]
+
+[ext_resource type="Script" path="res://first_launch.gd" id="1_53mu3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nkakq"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.230315, 0.230315, 0.230315, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="SystemFont" id="SystemFont_14da3"]
+font_names = PackedStringArray("Monospace")
+
+[node name="FirstLaunch" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1520.0
+offset_bottom = -830.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nkakq")
+script = ExtResource("1_53mu3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Text" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+text = "Hello and welcome to MiniFace.
+
+If you intend to use a webcam for tracking you will need to get a program called mediapipe-vt.
+The button below allows you to install it automatically. 
+
+The installation may take a while and will freeze the program while running the installation commands.
+
+You must have python, wget and unzip installed before you try this. No guarantees it will work."
+fit_content = true
+
+[node name="Spacer" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Install" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Install mediapipe-vt"
+
+[node name="Spacer" type="Label" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="Skip" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Skip
+"
+
+[node name="Console" type="RichTextLabel" parent="VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+theme_override_fonts/normal_font = SubResource("SystemFont_14da3")
+theme_override_font_sizes/normal_font_size = 8
+scroll_following = true
+
+[node name="Close" type="Button" parent="VBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Close"
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Install" to="." method="_install_mediapipe"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Skip" to="." method="_close"]
+[connection signal="pressed" from="VBoxContainer/Close" to="." method="_close"]

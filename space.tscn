@@ -98,7 +98,6 @@ text = "Arm angle"
 layout_mode = 2
 min_value = -90.0
 max_value = 90.0
-value = 90.0
 
 [node name="HTBRLabel" type="Label" parent="UI/Top/Model/Settings"]
 layout_mode = 2
@@ -232,6 +231,28 @@ item_0/text = "Mediapipe-VT"
 item_1/text = "VTube Studio"
 item_2/text = "iFacialMocap"
 
+[node name="MediapipeSettings" type="VBoxContainer" parent="UI/Top/Tracker"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Top/Tracker/MediapipeSettings"]
+visible = false
+layout_mode = 2
+text = "Mediapipe-vt is not
+found. Will only listen
+for tracking data."
+
+[node name="Camera" type="HBoxContainer" parent="UI/Top/Tracker/MediapipeSettings"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Top/Tracker/MediapipeSettings/Camera"]
+layout_mode = 2
+text = "Camera ID:"
+
+[node name="id" type="SpinBox" parent="UI/Top/Tracker/MediapipeSettings/Camera"]
+layout_mode = 2
+max_value = 10.0
+
 [node name="PhoneSettings" type="VBoxContainer" parent="UI/Top/Tracker"]
 visible = false
 layout_mode = 2
@@ -312,8 +333,10 @@ sky_mode = 1
 [connection signal="value_changed" from="UI/Top/Camera/LightSettings/Height" to="." method="_on_light_up_down_changed"]
 [connection signal="toggled" from="UI/Top/Camera/TransparentBG/Toggle" to="." method="_on_toggle_transparency"]
 [connection signal="item_selected" from="UI/Top/Tracker/TrackersAvailable" to="." method="_on_tracker_selected"]
+[connection signal="value_changed" from="UI/Top/Tracker/MediapipeSettings/Camera/id" to="." method="_on_camera_id_changed"]
 [connection signal="text_changed" from="UI/Top/Tracker/PhoneSettings/IP" to="." method="_on_iphone_ip_changed"]
 [connection signal="toggled" from="UI/Top/Tracker/VMC/Activated" to="." method="_on_vmc_toggled"]
+[connection signal="toggled" from="UI/Top/Tracker/VowelsCompability/Toggle" to="." method="_on_use_vowels_changed"]
 [connection signal="value_changed" from="UI/Top/Tracker/Smoothing" to="." method="_on_smoothing_changed"]
 [connection signal="toggled" from="UI/Top/Tracker/StartStop" to="." method="_on_tracking_toggle"]
 [connection signal="pressed" from="UI/Top/Tracker/ResetRest" to="." method="_on_position_reset"]

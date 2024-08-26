@@ -48,8 +48,10 @@ var config = {
 		},
 		"tracker": {
 			"method": -1,
+			"camera_id": 0,
 			"iphone_ip": "",
-			"smoothing": 0.3
+			"smoothing": 0.3,
+			"use_vowels": 0
 		}
 	}
 
@@ -365,12 +367,30 @@ func _ready():
 		
 		# Load tracker
 		if config["tracker"]["method"] >= 0:
-			$UI/Top/Tracker/TrackersAvailable.select(config["tracker"]["method"])
+			if DirAccess.open("mediapipe-vt-master"):
+				$UI/Top/Tracker/MediapipeSettings/Camera.visible = true
+				$UI/Top/Tracker/MediapipeSettings/Label.visible = false
+			else:
+				$UI/Top/Tracker/MediapipeSettings/Camera.visible = false
+				$UI/Top/Tracker/MediapipeSettings/Label.visible = true
+		
+		$UI/Top/Tracker/MediapipeSettings/Camera/id.set_value_no_signal(config["tracker"]["camera_id"])
 		$UI/Top/Tracker/PhoneSettings/IP.text = config["tracker"]["iphone_ip"]
 		$UI/Top/Tracker/Smoothing.set_value_no_signal(config["tracker"]["smoothing"])
 		
 		if config["tracker"]["method"] == 1 or config["tracker"]["method"] == 2:
 			$UI/Top/Tracker/PhoneSettings.visible = true
+		
+		if config["tracker"]["use_vowels"]:
+			$UI/Top/Tracker/VowelsCompability/Toggle.button_pressed = true
+			
+	# This is the first time we launch
+	else:
+		var setup = load("res://first_launch.tscn").instantiate()
+		self.add_child(setup)
+		setup.position = get_viewport().size / 2
+		setup.position.x -= 200
+		setup.position.y -= 200
 
 func _exit_tree():
 	var f = FileAccess.open("user://config.json", FileAccess.WRITE)
@@ -627,6 +647,9 @@ func _on_tracking_toggle(toggled_on):
 		
 		if t == 0:
 			tracker = load("res://trackers/mediapipe-vt.tscn").instantiate()
+			if $UI/Top/Tracker/MediapipeSettings/Camera.visible:
+				tracker.mediapipe_camera = $UI/Top/Tracker/MediapipeSettings/Camera/id.value
+				tracker.start_mediapipe()
 			add_child(tracker)
 			tracker.connect("publish_new_data", _on_tracking_data_recived)
 			
@@ -668,9 +691,17 @@ func _on_tracker_selected(index):
 		t = $UI/Top/Tracker/TrackersAvailable.get_selected_items()[0]
 		
 	if t == 1 or t == 2:
+		$UI/Top/Tracker/MediapipeSettings.visible = false
 		$UI/Top/Tracker/PhoneSettings.visible = true
 		
 	else:
+		if DirAccess.open("mediapipe-vt-master"):
+			$UI/Top/Tracker/MediapipeSettings/Camera.visible = true
+			$UI/Top/Tracker/MediapipeSettings/Label.visible = false
+		else:
+			$UI/Top/Tracker/MediapipeSettings/Camera.visible = false
+			$UI/Top/Tracker/MediapipeSettings/Label.visible = true
+		$UI/Top/Tracker/MediapipeSettings.visible = true
 		$UI/Top/Tracker/PhoneSettings.visible = false
 
 func _on_position_reset():
@@ -753,3 +784,12 @@ func _on_live2d_movement_changed(toggled_on):
 		config["model"]["live2d_movement"] = 1
 	else:
 		config["model"]["live2d_movement"] = 0
+
+func _on_use_vowels_changed(toggled_on):
+	if toggled_on:
+		config["tracker"]["use_vowels"] = 1
+	else:
+		config["tracker"]["use_vowels"] = 0
+
+func _on_camera_id_changed(value):
+	config["tracker"]["camera_id"] = value

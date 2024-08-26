@@ -1,6 +1,8 @@
 extends Node
 
 var listening_thread: Thread
+@export var mediapipe_camera = 0
+var mediapipe_thread: Thread
 var running = false
 
 signal publish_new_data
@@ -207,6 +209,21 @@ func _ready():
 	listening_thread = Thread.new()
 	listening_thread.start(_listening_thread.bind())
 
+func _mediapipe_thread():
+	if OS.get_name() == "Windows":
+		OS.execute("mediapipe-vt-master/miniface-run.bat", [str(mediapipe_camera)])
+	else:
+		OS.execute("./mediapipe-vt-master/miniface-run.sh", [str(mediapipe_camera)])
+		
+func start_mediapipe():
+	mediapipe_thread = Thread.new()
+	mediapipe_thread.start(_mediapipe_thread.bind())
+
 func _exit_tree():
 	running = false
 	listening_thread.wait_to_finish()
+	if mediapipe_thread:
+		var udp = PacketPeerUDP.new()
+		udp.connect_to_host("127.0.0.1", 50523)
+		udp.put_packet("aa".to_utf8_buffer())
+		mediapipe_thread.wait_to_finish()
