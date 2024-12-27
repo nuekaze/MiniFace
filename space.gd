@@ -35,7 +35,8 @@ var config = {
 			"live2d_movement": 0
 		},
 		"camera": {
-			"position": 0,
+			"position": [0.0, 0.0, 0.0],
+			"rotation": [0.0, 0.0, 0.0],
 			"distance": 1.0,
 			"height": 1.7,
 			"light": {
@@ -54,6 +55,8 @@ var config = {
 			"use_vowels": 0
 		}
 	}
+
+var mouse_last: Vector2 = Vector2(0.0, 0.0)
 
 # Tracking data is always in "VTube Studio like" format.
 var tracking_data = {
@@ -202,127 +205,147 @@ func load_vrm_model(path: String) -> Node3D:
 
 # Process stuff
 func _physics_process(_delta):
-		if skel and tracker != null:
-			# Only process bones from tracking data if VMC is disabled.
-			if not $UI/Top/Tracker/VMC/Activated.button_pressed:
-				# Bones are updated every frame for the smoothing feature to work.
-				# Maybe not the best optimization but the easiest way to implement it for now.
-				var tmp = Vector3(
-						tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
-						tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
-						tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
-					) + skel.get_bone_rest(hips).origin
-				
-				skel.set_bone_pose_position(hips, 
-					skel.get_bone_pose_position(hips) * $UI/Top/Tracker/Smoothing.value + 
-					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
-				)
+	# Update camera
+	if Input.is_action_pressed("drag"):
+		var m = get_viewport().get_mouse_position() - mouse_last
+		m = Vector3(-m.x, m.y, 0.0) * 0.002 * $CameraPosition/CameraView.position.z
+		m = $CameraPosition/CameraView.global_basis * m
+		$CameraPosition.position += m
+		
+	elif Input.is_action_pressed("rotate"):
+		var m = get_viewport().get_mouse_position() - mouse_last
+		m *= $CameraPosition/CameraView.position.z
+		$CameraPosition.rotation.x -= deg_to_rad(m.y)
+		$CameraPosition.rotation.y -= deg_to_rad(m.x)
+	
+	if Input.is_action_just_pressed("zoom_in"):
+		$CameraPosition/CameraView.position.z -= 0.1
+	elif Input.is_action_just_pressed("zoom_out"):
+		$CameraPosition/CameraView.position.z += 0.1
+	
+	if skel and tracker != null:
+		# Only process bones from tracking data if VMC is disabled.
+		if not $UI/Top/Tracker/VMC/Activated.button_pressed:
+			# Bones are updated every frame for the smoothing feature to work.
+			# Maybe not the best optimization but the easiest way to implement it for now.
+			var tmp = Vector3(
+					tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
+					tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
+					tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
+				) + skel.get_bone_rest(hips).origin
+			
+			skel.set_bone_pose_position(hips, 
+				skel.get_bone_pose_position(hips) * $UI/Top/Tracker/Smoothing.value + 
+				tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
+			)
 
-				if secondary:
-					tmp = Vector3(
-						tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
-						tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
-						tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
-					) + secondary_skel.get_bone_rest(secondary_hips).origin
-					
-					secondary_skel.set_bone_pose_position(secondary_hips, 
-						secondary_skel.get_bone_pose_position(secondary_hips) * $UI/Top/Tracker/Smoothing.value + 
-						tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
-					)
-			
-				tmp = Quaternion.from_euler(Vector3(
-						tracking_data["Rotation"]["x"] - rest_pose["Rotation"]["x"],
-						tracking_data["Rotation"]["y"] - rest_pose["Rotation"]["y"],
-						tracking_data["Rotation"]["z"] - rest_pose["Rotation"]["z"]
-					) * $UI/Top/Model/Settings/HeadToBodyRatio.value) * Quaternion(skel.get_bone_rest(hips).basis)
+			if secondary:
+				tmp = Vector3(
+					tracking_data["Position"]["x"] - rest_pose["Position"]["x"],
+					tracking_data["Position"]["y"] - rest_pose["Position"]["y"],
+					tracking_data["Position"]["z"] - rest_pose["Position"]["z"]
+				) + secondary_skel.get_bone_rest(secondary_hips).origin
 				
-				skel.set_bone_pose_rotation(hips, 
-					skel.get_bone_pose_rotation(hips) * $UI/Top/Tracker/Smoothing.value + 
+				secondary_skel.set_bone_pose_position(secondary_hips, 
+					secondary_skel.get_bone_pose_position(secondary_hips) * $UI/Top/Tracker/Smoothing.value + 
 					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
 				)
-				
-				if secondary:
-					secondary_skel.set_bone_pose_rotation(secondary_hips, 
-						secondary_skel.get_bone_pose_rotation(secondary_hips) * $UI/Top/Tracker/Smoothing.value + 
-						tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
-					)
-				
-				tmp = Quaternion.from_euler(Vector3(
-						tracking_data["Rotation"]["x"] - rest_pose["Rotation"]["x"],
-						tracking_data["Rotation"]["y"] - rest_pose["Rotation"]["y"],
-						tracking_data["Rotation"]["z"] - rest_pose["Rotation"]["z"]
-					) * (1.0 - $UI/Top/Model/Settings/HeadToBodyRatio.value)) * Quaternion(skel.get_bone_rest(head).basis)
-				
-				skel.set_bone_pose_rotation(head, 
-					skel.get_bone_pose_rotation(head) * $UI/Top/Tracker/Smoothing.value + 
-					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
-				)
-				
-				if secondary:
-					secondary_skel.set_bone_pose_rotation(secondary_head, 
-						secondary_skel.get_bone_pose_rotation(secondary_head) * $UI/Top/Tracker/Smoothing.value + 
-						tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
-					)
+		
+			tmp = Quaternion.from_euler(Vector3(
+					tracking_data["Rotation"]["x"] - rest_pose["Rotation"]["x"],
+					tracking_data["Rotation"]["y"] - rest_pose["Rotation"]["y"],
+					tracking_data["Rotation"]["z"] - rest_pose["Rotation"]["z"]
+				) * $UI/Top/Model/Settings/HeadToBodyRatio.value) * Quaternion(skel.get_bone_rest(hips).basis)
 			
-			# Process VMC data
-			elif tracking_data.has("VMC"):
-				for bone in tracking_data["VMC"]:
-					if bone["Name"] == "root":
-						character.position = bone["Position"]
-						character.rotation = bone["Rotation"].get_euler()
-					else:
-						if skel_bones.has(bone["Name"]):
-							var rot = bone["Rotation"]
-							
-							var rest = Quaternion(skel.get_bone_rest(skel_bones[bone["Name"]]).basis)
-							rot = rest * rot
-							
-							# Apply rotations
-							skel.set_bone_pose_rotation(skel_bones[bone["Name"]], rot)
-							if secondary and secondary_skel_bones.has(bone["Name"]):
-								secondary_skel.set_bone_pose_rotation(secondary_skel_bones[bone["Name"]], rot)
+			skel.set_bone_pose_rotation(hips, 
+				skel.get_bone_pose_rotation(hips) * $UI/Top/Tracker/Smoothing.value + 
+				tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
+			)
 			
-			if $UI/Top/Tracker/VowelsCompability/Toggle.button_pressed:
-				var eye = skel.find_bone("LeftEye")
-				var tmp = Quaternion(
-						tracking_data["left_eye"]["x"],
-						tracking_data["left_eye"]["y"],
-						tracking_data["left_eye"]["z"],
-						tracking_data["left_eye"]["w"]
-					) *  Quaternion(skel.get_bone_rest(eye).basis)
-				
-				skel.set_bone_pose_rotation(eye, 
-					skel.get_bone_pose_rotation(eye) * $UI/Top/Tracker/Smoothing.value + 
-					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
-				)
-				eye = skel.find_bone("RightEye")
-				tmp = Quaternion(
-						tracking_data["right_eye"]["x"],
-						tracking_data["right_eye"]["y"],
-						tracking_data["right_eye"]["z"],
-						tracking_data["right_eye"]["w"]
-					) *  Quaternion(skel.get_bone_rest(eye).basis)
-				
-				skel.set_bone_pose_rotation(eye, 
-					skel.get_bone_pose_rotation(eye) * $UI/Top/Tracker/Smoothing.value + 
+			if secondary:
+				secondary_skel.set_bone_pose_rotation(secondary_hips, 
+					secondary_skel.get_bone_pose_rotation(secondary_hips) * $UI/Top/Tracker/Smoothing.value + 
 					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
 				)
 			
-		if face:
-			# Process blendshapes
-			var blendshapes = null
-			if $UI/Top/Tracker/VowelsCompability/Toggle.button_pressed:
-				blendshapes = tracking_data["Blendshapes"]["vowels"]
-			else:
-				blendshapes = tracking_data["Blendshapes"]
-				
-			for b in blendshapes.keys():
-				var shape = face.find_blend_shape_by_name(b)
-				if shape != -1:
-					face.set_blend_shape_value(shape, 
-						face.get_blend_shape_value(shape) * $UI/Top/Tracker/Smoothing.value + 
-						blendshapes[b] * (1.0 - $UI/Top/Tracker/Smoothing.value)
-					)
+			tmp = Quaternion.from_euler(Vector3(
+					tracking_data["Rotation"]["x"] - rest_pose["Rotation"]["x"],
+					tracking_data["Rotation"]["y"] - rest_pose["Rotation"]["y"],
+					tracking_data["Rotation"]["z"] - rest_pose["Rotation"]["z"]
+				) * (1.0 - $UI/Top/Model/Settings/HeadToBodyRatio.value)) * Quaternion(skel.get_bone_rest(head).basis)
+			
+			skel.set_bone_pose_rotation(head, 
+				skel.get_bone_pose_rotation(head) * $UI/Top/Tracker/Smoothing.value + 
+				tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
+			)
+			
+			if secondary:
+				secondary_skel.set_bone_pose_rotation(secondary_head, 
+					secondary_skel.get_bone_pose_rotation(secondary_head) * $UI/Top/Tracker/Smoothing.value + 
+					tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
+				)
+		
+		# Process VMC data
+		elif tracking_data.has("VMC"):
+			for bone in tracking_data["VMC"]:
+				if bone["Name"] == "root":
+					character.position = bone["Position"]
+					character.rotation = bone["Rotation"].get_euler()
+				else:
+					if skel_bones.has(bone["Name"]):
+						var rot = bone["Rotation"]
+						
+						var rest = Quaternion(skel.get_bone_rest(skel_bones[bone["Name"]]).basis)
+						rot = rest * rot
+						
+						# Apply rotations
+						skel.set_bone_pose_rotation(skel_bones[bone["Name"]], rot)
+						if secondary and secondary_skel_bones.has(bone["Name"]):
+							secondary_skel.set_bone_pose_rotation(secondary_skel_bones[bone["Name"]], rot)
+		
+		if $UI/Top/Tracker/VowelsCompability/Toggle.button_pressed:
+			var eye = skel.find_bone("LeftEye")
+			var tmp = Quaternion(
+					tracking_data["left_eye"]["x"],
+					tracking_data["left_eye"]["y"],
+					tracking_data["left_eye"]["z"],
+					tracking_data["left_eye"]["w"]
+				) *  Quaternion(skel.get_bone_rest(eye).basis)
+			
+			skel.set_bone_pose_rotation(eye, 
+				skel.get_bone_pose_rotation(eye) * $UI/Top/Tracker/Smoothing.value + 
+				tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
+			)
+			eye = skel.find_bone("RightEye")
+			tmp = Quaternion(
+					tracking_data["right_eye"]["x"],
+					tracking_data["right_eye"]["y"],
+					tracking_data["right_eye"]["z"],
+					tracking_data["right_eye"]["w"]
+				) *  Quaternion(skel.get_bone_rest(eye).basis)
+			
+			skel.set_bone_pose_rotation(eye, 
+				skel.get_bone_pose_rotation(eye) * $UI/Top/Tracker/Smoothing.value + 
+				tmp * (1.0 - $UI/Top/Tracker/Smoothing.value)
+			)
+		
+	if face:
+		# Process blendshapes
+		var blendshapes = null
+		if $UI/Top/Tracker/VowelsCompability/Toggle.button_pressed:
+			blendshapes = tracking_data["Blendshapes"]["vowels"]
+		else:
+			blendshapes = tracking_data["Blendshapes"]
+			
+		for b in blendshapes.keys():
+			var shape = face.find_blend_shape_by_name(b)
+			if shape != -1:
+				face.set_blend_shape_value(shape, 
+					face.get_blend_shape_value(shape) * $UI/Top/Tracker/Smoothing.value + 
+					blendshapes[b] * (1.0 - $UI/Top/Tracker/Smoothing.value)
+				)
+	
+	mouse_last = get_viewport().get_mouse_position()
 
 func _on_viewport_resize():
 	$UI.size.y = get_viewport().size.y
@@ -348,11 +371,13 @@ func _ready():
 			$UI/Top/Model/Settings/ArmAngle.value = config["model"]["arm_angle"]
 			$UI/Top/Model/Settings/HeadToBodyRatio.set_value_no_signal(config["model"]["hm_ratio"])
 		
-		# Load camera.
-		$UI/Top/Camera/Position.set_value_no_signal(config["camera"]["position"])
-		$UI/Top/Camera/Distance.set_value_no_signal(config["camera"]["distance"])
-		$UI/Top/Camera/Height.set_value_no_signal(config["camera"]["height"])
-		_on_camera_change(0)
+		# Camera
+		$CameraPosition.position.x = config["camera"]["position"][0]
+		$CameraPosition.position.y = config["camera"]["position"][1]
+		$CameraPosition.position.z = config["camera"]["position"][2]
+		$CameraPosition.rotation.x = config["camera"]["rotation"][0]
+		$CameraPosition.rotation.y = config["camera"]["rotation"][1]
+		$CameraPosition.rotation.z = config["camera"]["rotation"][2]
 		
 		# Load light
 		$UI/Top/Camera/Light/Toggle.button_pressed = config["camera"]["light"]["enabled"]
@@ -393,6 +418,16 @@ func _ready():
 		setup.position.y -= 200
 
 func _exit_tree():
+	config["camera"]["position"] = [
+		$CameraPosition.position.x,
+		$CameraPosition.position.y,
+		$CameraPosition.position.z
+		]
+	config["camera"]["rotation"] = [
+		$CameraPosition.rotation.x,
+		$CameraPosition.rotation.y,
+		$CameraPosition.rotation.z
+		]
 	var f = FileAccess.open("user://config.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(config, '  '))
 
@@ -522,18 +557,6 @@ func _on_facemesh_selected(index):
 		config["model"]["facemesh"] = index
 	else:
 		print("Could not find facemesh")
-
-func _on_camera_change(value):
-	$Camera3D.position = Vector3(
-		sin(deg_to_rad(float($UI/Top/Camera/Position.value))) * float($UI/Top/Camera/Distance.value),
-		float($UI/Top/Camera/Height.value),
-		cos(deg_to_rad(float($UI/Top/Camera/Position.value))) * float($UI/Top/Camera/Distance.value)
-		)
-	$Camera3D.rotation.y = deg_to_rad(float($UI/Top/Camera/Position.value))
-	
-	config["camera"]["position"] = $UI/Top/Camera/Position.value
-	config["camera"]["distance"] = $UI/Top/Camera/Distance.value
-	config["camera"]["height"] = $UI/Top/Camera/Height.value
 
 func _on_arm_angle_change(value):
 	value = -value
@@ -763,11 +786,11 @@ func _on_toggle_transparency(toggled_on):
 	ProjectSettings.set_setting("display/window/per_pixel_transparency/allowed", toggled_on)
 	
 	if toggled_on:
-		$Camera3D.environment = null
+		$CameraPosition/CameraView.environment = null
 	else:
-		$Camera3D.environment = Environment.new()
-		$Camera3D.environment.background_mode = 1
-		$Camera3D.environment.background_color = Color(0, 1, 0, 0)
+		$CameraPosition/CameraView.environment = Environment.new()
+		$CameraPosition/CameraView.environment.background_mode = 1
+		$CameraPosition/CameraView.environment.background_color = Color(0, 1, 0, 0)
 
 func _on_vmc_toggled(toggled_on):
 	if toggled_on:

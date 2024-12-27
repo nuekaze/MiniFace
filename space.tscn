@@ -1,17 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://c2ms0vu61eflh"]
+[gd_scene load_steps=4 format=3 uid="uid://c2ms0vu61eflh"]
 
 [ext_resource type="Script" path="res://space.gd" id="1_o4tpj"]
 [ext_resource type="Script" path="res://UI.gd" id="1_v7e47"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rjrao"]
 bg_color = Color(0, 0, 0, 0.501961)
-
-[sub_resource type="Environment" id="Environment_ey3ga"]
-background_mode = 1
-background_color = Color(0, 1, 0, 0)
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-reflected_light_source = 1
 
 [node name="Scene" type="Node3D"]
 script = ExtResource("1_o4tpj")
@@ -122,37 +115,6 @@ layout_mode = 2
 
 [node name="Camera" type="VBoxContainer" parent="UI/Top"]
 layout_mode = 2
-
-[node name="PositionLabel" type="Label" parent="UI/Top/Camera"]
-layout_mode = 2
-text = "Camera Position"
-
-[node name="Position" type="HSlider" parent="UI/Top/Camera"]
-layout_mode = 2
-min_value = -180.0
-max_value = 180.0
-
-[node name="DistanceLabel" type="Label" parent="UI/Top/Camera"]
-layout_mode = 2
-text = "Camera Distance
-"
-
-[node name="Distance" type="HSlider" parent="UI/Top/Camera"]
-layout_mode = 2
-max_value = 2.0
-step = 0.01
-value = 1.0
-
-[node name="HeightLabel" type="Label" parent="UI/Top/Camera"]
-layout_mode = 2
-text = "Camera Height
-"
-
-[node name="Height" type="HSlider" parent="UI/Top/Camera"]
-layout_mode = 2
-max_value = 2.0
-step = 0.01
-value = 1.7
 
 [node name="Light" type="HBoxContainer" parent="UI/Top/Camera"]
 layout_mode = 2
@@ -305,13 +267,15 @@ text = "Start"
 layout_mode = 2
 text = "Reset position"
 
-[node name="Camera3D" type="Camera3D" parent="."]
-environment = SubResource("Environment_ey3ga")
-current = true
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 visible = false
 sky_mode = 1
+
+[node name="CameraPosition" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.770491, 0.637451, 0, -0.637451, 0.770491, 0, 0, 0)
+
+[node name="CameraView" type="Camera3D" parent="CameraPosition"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.008)
 
 [connection signal="file_selected" from="UI/Top/Model/PrimarySelectDialog" to="." method="_on_model_selected"]
 [connection signal="file_selected" from="UI/Top/Model/SecondarySelectDialog" to="." method="_on_secondary_selected"]
@@ -323,9 +287,6 @@ sky_mode = 1
 [connection signal="value_changed" from="UI/Top/Model/Settings/ArmAngle" to="." method="_on_arm_angle_change"]
 [connection signal="value_changed" from="UI/Top/Model/Settings/HeadToBodyRatio" to="." method="_on_hm_ratio_changed"]
 [connection signal="toggled" from="UI/Top/Model/Settings/Live2DStyleMovement/Toggle" to="." method="_on_live2d_movement_changed"]
-[connection signal="value_changed" from="UI/Top/Camera/Position" to="." method="_on_camera_change"]
-[connection signal="value_changed" from="UI/Top/Camera/Distance" to="." method="_on_camera_change"]
-[connection signal="value_changed" from="UI/Top/Camera/Height" to="." method="_on_camera_change"]
 [connection signal="toggled" from="UI/Top/Camera/Light/Toggle" to="." method="_on_light_enable"]
 [connection signal="value_changed" from="UI/Top/Camera/LightSettings/Temperature" to="." method="_on_light_color_changed"]
 [connection signal="value_changed" from="UI/Top/Camera/LightSettings/Strength" to="." method="_on_light_strength_change"]
